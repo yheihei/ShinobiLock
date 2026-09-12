@@ -7,14 +7,32 @@ struct RuleEditorView: View {
     @State private var draft: LockRule
     @State private var selection: FamilyActivitySelection
     @State private var showingPicker = false
+    @State private var hasClosedPicker = false
     @State private var confirmingDelete = false
     @State private var errorMessage: String?
     private let isNew: Bool
 
+    private var selectionMessage: String? {
+        if selection.applicationTokens.count > LockRule.maximumApplications {
+            return ProbeError.tooManyApplications.errorDescription
+        }
+        if hasClosedPicker && selection.applicationTokens.isEmpty {
+            return "アプリが選択されていません。カテゴリを開いて、アプリを1つ以上選んでください。"
+        }
+        var proposed = draft
+        proposed.applications = selection.applicationTokens
+        let rules = model.state.rules.filter { $0.id != draft.id } + [proposed]
+        if RuleEvaluator.exceedsApplicationLimit(from: rules.map(\.scheduledApplications),
+                                                 maximum: LockRule.maximumApplications) {
+            return ProbeError.tooManyOverlappingApplications.errorDescription
+        }
+        return nil
+    }
+
     init(model: LockModel, rule: LockRule) {
         self.model = model
         _draft = State(initialValue: rule)
-        var selection = FamilyActivitySelection()
+        var selection = FamilyActivitySelection(includeEntireCategory: true)
         selection.applicationTokens = rule.applications
         _selection = State(initialValue: selection)
         isNew = !model.state.rules.contains { $0.id == rule.id }
@@ -51,19 +69,33 @@ struct RuleEditorView: View {
                     Text("終了時刻は開始時刻より後に設定してください。日付をまたぐ場合はルールを分けてください。")
                 }
                 Section {
-                    Button { showingPicker = true } label: {
+                    Button(action: openPicker) {
                         HStack {
-                            Label("アプリを選ぶ", systemImage: "apps.iphone")
+                            Label(hasClosedPicker && selection.applicationTokens.isEmpty ? "アプリを選び直す" : "アプリを選ぶ",
+                                  systemImage: "apps.iphone")
                             Spacer()
                             Text("\(selection.applicationTokens.count)個")
                             Image(systemName: "chevron.right").font(.caption)
                         }
                     }.disabled(!model.isAuthorized)
-                    if !selection.categoryTokens.isEmpty || !selection.webDomainTokens.isEmpty {
-                        Text("カテゴリとWebサイトは対象外です。カテゴリを開いて、アプリを個別に選んでください。")
+                    if !selection.applicationTokens.isEmpty {
+                        DisclosureGroup("ロックするアプリを確認") {
+                            ForEach(Array(selection.applicationTokens), id: \.self) { token in
+                                Label(token)
+                            }
+                        }
+                    }
+                    if let selectionMessage {
+                        Label(selectionMessage, systemImage: "exclamationmark.circle")
                             .font(.footnote).foregroundStyle(.red)
                     }
-                } header: { Text("対象アプリ") } footer: { Text("アプリを1つ以上選んでください。") }
+                    if !selection.webDomainTokens.isEmpty {
+                        Label("Webサイトは対象外です。選んだアプリだけを保存します。", systemImage: "info.circle")
+                            .font(.footnote).foregroundStyle(ShinobiStyle.muted)
+                    }
+                } header: { Text("対象アプリ") } footer: {
+                    Text("アプリを1〜\(LockRule.maximumApplications)個選んでください。カテゴリからまとめて選べます。後からインストールしたアプリは、もう一度選んで追加してください。")
+                }
                 Section {
                     Toggle("このルールを有効にする", isOn: $draft.isEnabled)
                         .disabled(!model.isAuthorized && !draft.isEnabled)
@@ -79,9 +111,19 @@ struct RuleEditorView: View {
             .navigationBarTitleDisplayMode(.inline)
             .toolbar {
                 ToolbarItem(placement: .cancellationAction) { Button("キャンセル") { dismiss() } }
-                ToolbarItem(placement: .confirmationAction) { Button("保存", action: save).bold().disabled(model.working) }
+                ToolbarItem(placement: .confirmationAction) {
+                    Button("保存", action: save).bold()
+                        .disabled(model.working || selection.applicationTokens.isEmpty || selectionMessage != nil)
+                }
             }
-            .familyActivityPicker(isPresented: $showingPicker, selection: $selection)
+            .familyActivityPicker(
+                headerText: "ロックするアプリを選んでください。カテゴリを選ぶと、中のアプリをまとめて選べます。",
+                footerText: "Webサイトはロックの対象外です。アプリを1〜\(LockRule.maximumApplications)個選んでください。",
+                isPresented: $showingPicker, selection: $selection
+            )
+            .onChange(of: showingPicker) { _, isPresented in
+                if !isPresented { hasClosedPicker = true }
+            }
             .confirmationDialog("このルールを削除しますか？", isPresented: $confirmingDelete, titleVisibility: .visible) {
                 Button("削除する", role: .destructive) {
                     do { try model.delete(draft.id); dismiss() }
@@ -94,12 +136,17 @@ struct RuleEditorView: View {
         }
     }
 
+    private func openPicker() {
+        // Reopen the saved app snapshot, so categories only act as bulk selection.
+        var appsOnly = FamilyActivitySelection(includeEntireCategory: true)
+        appsOnly.applicationTokens = selection.applicationTokens
+        selection = appsOnly
+        showingPicker = true
+    }
+
     private func save() {
+        guard !selection.applicationTokens.isEmpty else { return }
         do {
-            guard selection.categoryTokens.isEmpty && selection.webDomainTokens.isEmpty else {
-                errorMessage = "カテゴリやWebサイトの選択を外して、アプリを個別に選んでください。"
-                return
-            }
             draft.applications = selection.applicationTokens
             try model.save(draft)
             dismiss()

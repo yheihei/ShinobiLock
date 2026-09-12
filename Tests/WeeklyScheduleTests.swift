@@ -66,3 +66,37 @@ private func date(_ day: Int, _ hour: Int, _ minute: Int, _ second: Int = 0) -> 
     #expect(regular.monitoringEndMinute == 615)
     #expect(regular.endWarningMinutes == nil)
 }
+
+@Test func applicationLimitAllowsFiftyAndRejectsFiftyOne() {
+    var rule = ScheduledApplications(schedule: WeeklySchedule(weekdays: [7], startMinute: 600, endMinute: 660),
+                                     applications: Set(0..<50), enabled: true)
+    #expect(!RuleEvaluator.exceedsApplicationLimit(from: [rule], maximum: 50))
+    rule.applications.insert(50)
+    #expect(RuleEvaluator.exceedsApplicationLimit(from: [rule], maximum: 50))
+}
+
+@Test func applicationLimitCountsOnlySimultaneousEnabledRules() {
+    let first = ScheduledApplications(schedule: WeeklySchedule(weekdays: [7], startMinute: 600, endMinute: 660),
+                                      applications: Set(0..<30), enabled: true)
+    var second = ScheduledApplications(schedule: WeeklySchedule(weekdays: [7], startMinute: 659, endMinute: 720),
+                                       applications: Set(30..<60), enabled: true)
+    #expect(RuleEvaluator.exceedsApplicationLimit(from: [first, second], maximum: 50))
+    second.schedule.startMinute = 660
+    #expect(!RuleEvaluator.exceedsApplicationLimit(from: [first, second], maximum: 50))
+    second.schedule.startMinute = 630
+    second.schedule.weekdays = [1]
+    #expect(!RuleEvaluator.exceedsApplicationLimit(from: [first, second], maximum: 50))
+    second.schedule.weekdays = [7]
+    second.enabled = false
+    #expect(!RuleEvaluator.exceedsApplicationLimit(from: [first, second], maximum: 50))
+}
+
+@Test func applicationLimitDeduplicatesSharedAppsAcrossRules() {
+    let first = ScheduledApplications(schedule: WeeklySchedule(weekdays: [7], startMinute: 600, endMinute: 660),
+                                      applications: Set(0..<40), enabled: true)
+    var second = ScheduledApplications(schedule: WeeklySchedule(weekdays: [7], startMinute: 630, endMinute: 720),
+                                       applications: Set(20..<50), enabled: true)
+    #expect(!RuleEvaluator.exceedsApplicationLimit(from: [first, second], maximum: 50))
+    second.applications.insert(50)
+    #expect(RuleEvaluator.exceedsApplicationLimit(from: [first, second], maximum: 50))
+}

@@ -58,6 +58,23 @@ struct ScheduledApplications<Token: Hashable> {
 }
 
 enum RuleEvaluator {
+    static func exceedsApplicationLimit<Token: Hashable>(from rules: [ScheduledApplications<Token>],
+                                                         maximum: Int) -> Bool {
+        for day in 1...7 {
+            let dailyRules = rules.filter { $0.enabled && $0.schedule.weekdays.contains(day) }
+            // The set can only grow at a rule's start; ending rules are already excluded.
+            for minute in Set(dailyRules.map { $0.schedule.startMinute }) {
+                let applications = dailyRules.reduce(into: Set<Token>()) { result, rule in
+                    if rule.schedule.startMinute <= minute && minute < rule.schedule.endMinute {
+                        result.formUnion(rule.applications)
+                    }
+                }
+                if applications.count > maximum { return true }
+            }
+        }
+        return false
+    }
+
     static func lockedApplications<Token: Hashable>(from rules: [ScheduledApplications<Token>],
                                                     at date: Date, calendar: Calendar = .current) -> Set<Token> {
         rules.reduce(into: Set<Token>()) { result, rule in

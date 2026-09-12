@@ -10,6 +10,8 @@ enum ProbeError: LocalizedError {
     case noApplication
     case alreadyUnlocked
     case invalidName
+    case tooManyApplications
+    case tooManyOverlappingApplications
 
     var errorDescription: String? {
         switch self {
@@ -17,11 +19,15 @@ enum ProbeError: LocalizedError {
         case .noApplication: return "対象アプリを確認してください。設定には1つ以上のアプリが必要で、一時解除はロック時間中だけ利用できます。"
         case .alreadyUnlocked: return "ほかのアプリを一時解除中です。終了後にもう一度お試しください。"
         case .invalidName: return "ルール名は1〜30文字で入力してください。"
+        case .tooManyApplications: return "1つのルールで選べるアプリは\(LockRule.maximumApplications)個までです。対象アプリを減らしてください。"
+        case .tooManyOverlappingApplications: return "ほかのルールと合わせて、同じ時間にロックするアプリが\(LockRule.maximumApplications)個を超えます。対象アプリを減らすか、曜日・時間をずらしてください。"
         }
     }
 }
 
 struct LockRule: Codable, Identifiable, Equatable {
+    static let maximumApplications = 50
+
     var id: UUID = UUID()
     var name: String
     var schedule: WeeklySchedule
@@ -39,6 +45,7 @@ struct LockRule: Codable, Identifiable, Equatable {
         guard (1...30).contains(name.trimmingCharacters(in: .whitespacesAndNewlines).count) else { throw ProbeError.invalidName }
         try schedule.validate()
         guard !applications.isEmpty else { throw ProbeError.noApplication }
+        guard applications.count <= Self.maximumApplications else { throw ProbeError.tooManyApplications }
     }
 }
 
@@ -220,6 +227,9 @@ enum ProbeControl {
                 } else {
                     state.rules.append(rule)
                 }
+                guard !RuleEvaluator.exceedsApplicationLimit(from: state.rules.map(\.scheduledApplications),
+                                                             maximum: LockRule.maximumApplications)
+                else { throw ProbeError.tooManyOverlappingApplications }
                 state.record("ルールを保存", note: rule.id.uuidString)
             }
         } catch {
