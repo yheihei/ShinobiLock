@@ -54,4 +54,4 @@ SDKのPrivacyInfo.xcprivacyは各フレームワークに含まれます。公�
 - [元の要件定義書](docs/app_lock_mvp_requirements.md)
 - [実機検証記録](docs/device-verification.md)
 
-元の要件書は変更していません。キャラクター素材は使っておらず、採用する場合は[指定リポジトリ](https://github.com/omikirin/MCP)を参照します。
+元の要件書は変更していません。カルマの画面、立ち絵と確認結果は[カルマの間](docs/karma-room.md)を参照してください。

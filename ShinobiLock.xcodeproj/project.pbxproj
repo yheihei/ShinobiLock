@@ -55,10 +55,22 @@
 			path = "App/Fonts/Inter-Regular.ttf";
 			sourceTree = "SOURCE_ROOT";
 		};
+		5AFFD8F76399BB1CD54AFAA7 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "text.json";
+			path = "App/Resources/karma-lines.json";
+			sourceTree = "SOURCE_ROOT";
+		};
 		054155753924768D9F552BFD = {
 			isa = "PBXFileReference";
 			lastKnownFileType = "sourcecode.swift";
 			path = "Core/AccessWindow.swift";
+			sourceTree = "SOURCE_ROOT";
+		};
+		07013CFEBE0C68AAE46B2BA8 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "Core/KarmaDialogue.swift";
 			sourceTree = "SOURCE_ROOT";
 		};
 		336BE68FD0696AC6A4E5459B = {
@@ -77,6 +89,12 @@
 			isa = "PBXFileReference";
 			lastKnownFileType = "sourcecode.swift";
 			path = "Shared/ProbeState.swift";
+			sourceTree = "SOURCE_ROOT";
+		};
+		BC004E9E743FD14FC2505069 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "App/KarmaRoomView.swift";
 			sourceTree = "SOURCE_ROOT";
 		};
 		E1B7608E064AD7D99B502A4A = {
@@ -150,6 +168,10 @@
 			isa = "PBXBuildFile";
 			fileRef = "054155753924768D9F552BFD";
 		};
+		3BF44D93FDEF8080A2BB843F = {
+			isa = "PBXBuildFile";
+			fileRef = "07013CFEBE0C68AAE46B2BA8";
+		};
 		93177E527F47727F86163FFD = {
 			isa = "PBXBuildFile";
 			fileRef = "336BE68FD0696AC6A4E5459B";
@@ -161,6 +183,10 @@
 		C34C98C5CBE6D16D6BC3C044 = {
 			isa = "PBXBuildFile";
 			fileRef = "142FAEFEAEC1EAE29D7D812E";
+		};
+		87B342DBA75C3BD2FB76FA66 = {
+			isa = "PBXBuildFile";
+			fileRef = "BC004E9E743FD14FC2505069";
 		};
 		CF7BF2595B85010627959AFC = {
 			isa = "PBXBuildFile";
@@ -195,9 +221,11 @@
 			buildActionMask = "2147483647";
 			files = (
 				"F338BDAEE930C6E1264583B5",
+				"3BF44D93FDEF8080A2BB843F",
 				"93177E527F47727F86163FFD",
 				"1F3F30B9C3E8C3040FE29A24",
 				"C34C98C5CBE6D16D6BC3C044",
+				"87B342DBA75C3BD2FB76FA66",
 				"CF7BF2595B85010627959AFC",
 				"3AB20F4B8F8FD44E751A21D0",
 				"4B14660C1A9D159D16040DF1",
@@ -240,6 +268,10 @@
 			isa = "PBXBuildFile";
 			fileRef = "15C5B5176EEF0F5CFDFA8644";
 		};
+		B991A6F5F6500412BE4E6CBF = {
+			isa = "PBXBuildFile";
+			fileRef = "5AFFD8F76399BB1CD54AFAA7";
+		};
 		98E0239E52E7524FFC34821F = {
 			isa = "PBXResourcesBuildPhase";
 			buildActionMask = "2147483647";
@@ -249,6 +281,7 @@
 				"7467239CD6FAC4C1D033AD61",
 				"D6070A07AE3069EEE2990839",
 				"9636DD7F3F640397F8A4DDC3",
+				"B991A6F5F6500412BE4E6CBF",
 			);
 			runOnlyForDeploymentPostprocessing = "0";
 		};
@@ -343,6 +376,10 @@
 			isa = "PBXBuildFile";
 			fileRef = "054155753924768D9F552BFD";
 		};
+		9BDBCEB33AC691861E2F2057 = {
+			isa = "PBXBuildFile";
+			fileRef = "07013CFEBE0C68AAE46B2BA8";
+		};
 		8D4ED395D24D0B4328F0950B = {
 			isa = "PBXBuildFile";
 			fileRef = "336BE68FD0696AC6A4E5459B";
@@ -364,6 +401,7 @@
 			buildActionMask = "2147483647";
 			files = (
 				"33848555C58F4994665EDD6B",
+				"9BDBCEB33AC691861E2F2057",
 				"8D4ED395D24D0B4328F0950B",
 				"9924B983D63EF696742D4839",
 				"F576F4B9A2FE4E37F24021A6",
@@ -494,6 +532,10 @@
 			isa = "PBXBuildFile";
 			fileRef = "054155753924768D9F552BFD";
 		};
+		C947ED00EADEAA53B38C453B = {
+			isa = "PBXBuildFile";
+			fileRef = "07013CFEBE0C68AAE46B2BA8";
+		};
 		6F5B875A6A68907DB2BF68B2 = {
 			isa = "PBXBuildFile";
 			fileRef = "336BE68FD0696AC6A4E5459B";
@@ -515,6 +557,7 @@
 			buildActionMask = "2147483647";
 			files = (
 				"8761DE9B9E74399D60A4F16C",
+				"C947ED00EADEAA53B38C453B",
 				"6F5B875A6A68907DB2BF68B2",
 				"679BEAADBEF2C1478896ACB3",
 				"9950042B216ED47ECCD8A5D4",
@@ -645,6 +688,10 @@
 			isa = "PBXBuildFile";
 			fileRef = "054155753924768D9F552BFD";
 		};
+		46DD087AC1ACCFEC3DB8B208 = {
+			isa = "PBXBuildFile";
+			fileRef = "07013CFEBE0C68AAE46B2BA8";
+		};
 		E2F54DCB09084CF7B74A2A32 = {
 			isa = "PBXBuildFile";
 			fileRef = "336BE68FD0696AC6A4E5459B";
@@ -666,6 +713,7 @@
 			buildActionMask = "2147483647";
 			files = (
 				"C05018D0F09AD8CFF9E0BC09",
+				"46DD087AC1ACCFEC3DB8B208",
 				"E2F54DCB09084CF7B74A2A32",
 				"FA6F5CA23DDAF3569A3F27E3",
 				"1C282113C098E8CAB448F29E",
@@ -829,10 +877,13 @@
 				"60BA51A5A847BE5D626E9A56",
 				"1B547CD2AFB15ADF4765D858",
 				"15C5B5176EEF0F5CFDFA8644",
+				"5AFFD8F76399BB1CD54AFAA7",
 				"054155753924768D9F552BFD",
+				"07013CFEBE0C68AAE46B2BA8",
 				"336BE68FD0696AC6A4E5459B",
 				"883562D1FA3ACBF1619B4C2F",
 				"142FAEFEAEC1EAE29D7D812E",
+				"BC004E9E743FD14FC2505069",
 				"E1B7608E064AD7D99B502A4A",
 				"5C365629ACB454548DA40A72",
 				"62C267B261F4D9C899EE6AA8",

@@ -64,6 +64,11 @@ font_refs = {path: put("font." + path, {
     "isa": "PBXFileReference", "lastKnownFileType": "file" if path.endswith(".ttf") else "text",
     "path": path, "sourceTree": "SOURCE_ROOT",
 }) for path in font_files}
+resource_files = sorted(str(path.relative_to(ROOT)) for path in (ROOT / "App/Resources").glob("*.json"))
+resource_refs = {path: put("resource." + path, {
+    "isa": "PBXFileReference", "lastKnownFileType": "text.json",
+    "path": path, "sourceTree": "SOURCE_ROOT",
+}) for path in resource_files}
 specs = [
     ("ShinobiLock", "App/ShinobiLockApp.swift", None, None),
     ("ShieldConfiguration", "Extensions/ShieldConfiguration/ShieldConfigurationExtension.swift",
@@ -108,7 +113,9 @@ for name, source, extension_point, principal in specs:
                                   "files": [put(name + ".privacy", {"isa": "PBXBuildFile", "fileRef": privacy_ref})]
                                            + ([] if extension else [put("assets.build", {"isa": "PBXBuildFile", "fileRef": assets_ref})]
                                               + [put("font.build." + path, {"isa": "PBXBuildFile", "fileRef": ref})
-                                                 for path, ref in font_refs.items()]),
+                                                 for path, ref in font_refs.items()]
+                                              + [put("resource.build." + path, {"isa": "PBXBuildFile", "fileRef": ref})
+                                                 for path, ref in resource_refs.items()]),
                                   "runOnlyForDeploymentPostprocessing": "0"}),
     ]
     if not extension:
@@ -188,7 +195,7 @@ put("embedReport", {"isa": "PBXCopyFilesBuildPhase", "buildActionMask": "2147483
                     "files": report_embeds, "name": "Embed ExtensionKit Extensions",
                     "runOnlyForDeploymentPostprocessing": "0"})
 product_group = put("products", {"isa": "PBXGroup", "children": products, "name": "Products", "sourceTree": "<group>"})
-main_group = put("main", {"isa": "PBXGroup", "children": [config_ref, privacy_ref, assets_ref] + list(font_refs.values()) + list(source_refs.values()) + [product_group],
+main_group = put("main", {"isa": "PBXGroup", "children": [config_ref, privacy_ref, assets_ref] + list(font_refs.values()) + list(resource_refs.values()) + list(source_refs.values()) + [product_group],
                           "sourceTree": "<group>"})
 project_configs = []
 for configuration in ["Debug", "Release"]:

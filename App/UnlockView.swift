@@ -8,6 +8,7 @@ struct UnlockView: View {
     @StateObject private var ads = RewardedAds()
     @Environment(\.dismiss) private var dismiss
     @State private var loadingTask: Task<Void, Never>?
+    @State private var karmaEncounter: KarmaEncounter?
 
     private var activeAccess: TemporaryAccess? {
         guard let access = model.state.temporaryAccess, access.token == token, access.isValid() else { return nil }
@@ -20,44 +21,62 @@ struct UnlockView: View {
 
     var body: some View {
         NavigationStack {
-            ScrollView {
-                VStack(alignment: .leading, spacing: 20) {
-                    introduction
-                    if ads.granted {
-                        grantedCard
-                        if activeAccess != nil {
-                            Label("ホーム画面から対象アプリを開いてください。", systemImage: "arrow.up.forward.square")
-                                .shinobiFont().foregroundStyle(ShinobiStyle.secondary)
-                        }
-                    } else {
-                        VStack(alignment: .leading, spacing: 6) {
-                            Text("解除するアプリ").shinobiFont(12, relativeTo: .caption).foregroundStyle(ShinobiStyle.muted)
-                            Label(token).shinobiFont(17, weight: .medium)
-                        }.card(padding: 16)
-                        VStack(alignment: .leading, spacing: 14) {
-                            condition("広告を最後まで見ると、このアプリだけ5分間使えます。", symbol: "checkmark", accented: true)
-                            condition("途中で閉じると解除されません。", symbol: "xmark", accented: false)
-                        }.padding(.vertical, 4)
-                    }
+            Group {
+                if let encounter = karmaEncounter {
+                    KarmaRoomView(encounter: encounter, continueToAd: showAd, stayLocked: { dismiss() })
+                        .id(encounter.id)
+                } else {
+                    unlockDetails
                 }
-                .frame(maxWidth: .infinity, alignment: .leading)
-                .padding(.horizontal, 20).padding(.top, 28).padding(.bottom, 24)
             }
-            .shinobiScreen()
-            .safeAreaInset(edge: .top, spacing: 0) {
-                ShinobiHeader(title: "5分だけ使う") {
-                    if !ads.granted {
-                        Button("閉じる") { loadingTask?.cancel(); dismiss() }
-                            .foregroundStyle(ShinobiStyle.secondary).frame(minHeight: 44).disabled(ads.presenting)
+        }
+        .interactiveDismissDisabled(ads.presenting || karmaEncounter != nil)
+        .onDisappear { if !ads.presenting { loadingTask?.cancel() } }
+    }
+
+    private var unlockDetails: some View {
+        ScrollView {
+            VStack(alignment: .leading, spacing: 20) {
+                introduction
+                if ads.granted {
+                    grantedCard
+                    if activeAccess != nil {
+                        Label("ホーム画面から対象アプリを開いてください。", systemImage: "arrow.up.forward.square")
+                            .shinobiFont().foregroundStyle(ShinobiStyle.secondary)
                     }
-                } trailing: { Color.clear.frame(height: 44) }
+                } else {
+                    VStack(alignment: .leading, spacing: 6) {
+                        Text("解除するアプリ").shinobiFont(12, relativeTo: .caption).foregroundStyle(ShinobiStyle.muted)
+                        Label(token).shinobiFont(17, weight: .medium)
+                    }.card(padding: 16)
+                    VStack(alignment: .leading, spacing: 14) {
+                        condition("広告を最後まで見ると、このアプリだけ5分間使えます。", symbol: "checkmark", accented: true)
+                        condition("途中で閉じると解除されません。", symbol: "xmark", accented: false)
+                    }.padding(.vertical, 4)
+                }
             }
-            .safeAreaInset(edge: .bottom, spacing: 0) {
-                actions.padding(.horizontal, 20).padding(.top, 12).padding(.bottom, 16)
-                    .background(ShinobiStyle.background)
-            }
-            .interactiveDismissDisabled(ads.presenting)
-            .onDisappear { if !ads.presenting { loadingTask?.cancel() } }
+            .frame(maxWidth: .infinity, alignment: .leading)
+            .padding(.horizontal, 20).padding(.top, 28).padding(.bottom, 24)
+        }
+        .shinobiScreen()
+        .safeAreaInset(edge: .top, spacing: 0) {
+            ShinobiHeader(title: "5分だけ使う") {
+                if !ads.granted {
+                    Button("閉じる") { loadingTask?.cancel(); dismiss() }
+                        .foregroundStyle(ShinobiStyle.secondary).frame(minHeight: 44).disabled(ads.presenting)
+                }
+            } trailing: { Color.clear.frame(height: 44) }
+        }
+        .safeAreaInset(edge: .bottom, spacing: 0) {
+            actions.padding(.horizontal, 20).padding(.top, 12).padding(.bottom, 16)
+                .background(ShinobiStyle.background)
+        }
+    }
+
+    private func showAd() {
+        karmaEncounter = nil
+        loadingTask = Task {
+            await ads.show(eligible: { eligible }, reward: { try model.unlock(token) })
         }
     }
 
@@ -138,9 +157,8 @@ struct UnlockView: View {
                     ShinobiMessage(text: message, isError: ads.failed)
                 }
                 Button {
-                    loadingTask = Task {
-                        await ads.show(eligible: { eligible }, reward: { try model.unlock(token) })
-                    }
+                    guard eligible, !ads.busy else { return }
+                    karmaEncounter = KarmaDialogue.next()
                 } label: {
                     HStack(spacing: 8) {
                         if ads.busy { ProgressView() }

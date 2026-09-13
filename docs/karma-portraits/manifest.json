@@ -1,0 +1,67 @@
+{
+  "character": "CryptoNinja #024 Karma",
+  "reference": "NINJAMCP get_character / get_character_image; official 2D and 3D character art",
+  "art_direction": "Cool and sardonic expressions are an app-specific interpretation; personality is not specified by the MCP profile.",
+  "portraits": [
+    {
+      "name": "karma-cool-smirk",
+      "label": "正面・ニヒルな薄笑い",
+      "transparent_sha256": "6ce308c6874a4a275692a09bcb613f9dc5895ada94b9c3b86afe26d9d77847b6",
+      "app_asset": "App/Assets.xcassets/karma-cool-smirk.imageset/karma-cool-smirk.png"
+    },
+    {
+      "name": "karma-cool-folded-arms",
+      "label": "右斜め・腕組み",
+      "transparent_sha256": "0fe9a18d0b24b1a5df9a3003b6a74bef2c6397cf285273861f171fea538049d2",
+      "app_asset": "App/Assets.xcassets/karma-cool-folded-arms.imageset/karma-cool-folded-arms.png"
+    },
+    {
+      "name": "karma-cool-side-eye",
+      "label": "左斜め・横目の皮肉",
+      "transparent_sha256": "32e12c7e9a5ea747bf2559957c24d1edf61eca2febba5305d3614bf11d9ef4fb",
+      "app_asset": "App/Assets.xcassets/karma-cool-side-eye.imageset/karma-cool-side-eye.png"
+    },
+    {
+      "name": "karma-cool-appraising",
+      "label": "右横顔・顎に手",
+      "transparent_sha256": "c12cb7969b6e314ba0e051745c71cc0b45d98ee99dd554ac487f45b86a8fd730",
+      "app_asset": "App/Assets.xcassets/karma-cool-appraising.imageset/karma-cool-appraising.png"
+    },
+    {
+      "name": "karma-cool-knowing",
+      "label": "左横顔・含み笑い",
+      "transparent_sha256": "ad4143eb15ff4217937862e8155b63d918eac08f3c81771a0b6c8d40cc3db897",
+      "app_asset": "App/Assets.xcassets/karma-cool-knowing.imageset/karma-cool-knowing.png"
+    },
+    {
+      "name": "karma-cool-questioning",
+      "label": "俯瞰・片眉を上げる",
+      "transparent_sha256": "5a75934abb71c6042aae9b4f34a5d1399bf591d478156c1505e5d39c575dfdcf",
+      "app_asset": "App/Assets.xcassets/karma-cool-questioning.imageset/karma-cool-questioning.png"
+    },
+    {
+      "name": "karma-cool-unimpressed",
+      "label": "あおり・無言の視線",
+      "transparent_sha256": "0a90a1bf2930da3df8e2ad1c3b1106806f20e2da0e4ff08d4a1031383d736ae5",
+      "app_asset": "App/Assets.xcassets/karma-cool-unimpressed.imageset/karma-cool-unimpressed.png"
+    },
+    {
+      "name": "karma-cool-scarf",
+      "label": "右後方・肩越しの薄笑い",
+      "transparent_sha256": "ce9f0e687b8c9fcf2ab9ca3ce450565a8c14a654008c150d83b4f4fe99c31170",
+      "app_asset": "App/Assets.xcassets/karma-cool-scarf.imageset/karma-cool-scarf.png"
+    },
+    {
+      "name": "karma-cool-looking-back",
+      "label": "左後方・静かな振り返り",
+      "transparent_sha256": "b71d4fc9a29847f20bae2783a9dec09aef45a60c221bb2cf8e819a61de542445",
+      "app_asset": "App/Assets.xcassets/karma-cool-looking-back.imageset/karma-cool-looking-back.png"
+    },
+    {
+      "name": "karma-cool-hand-on-hip",
+      "label": "斜め下・腰に手",
+      "transparent_sha256": "676ece4a0d0c8c2f86227bb655514da2bd0fce4dde6f65eae055d93916daccc3",
+      "app_asset": "App/Assets.xcassets/karma-cool-hand-on-hip.imageset/karma-cool-hand-on-hip.png"
+    }
+  ]
+}
