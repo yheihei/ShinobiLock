@@ -24,6 +24,11 @@
 	<string>忍びロック</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
+	<key>UIAppFonts</key>
+	<array>
+		<string>Inter-Medium.ttf</string>
+		<string>Inter-Regular.ttf</string>
+	</array>
 	<key>GADApplicationIdentifier</key>
 	<string>$(SHINOBI_ADMOB_APP_ID)</string>
 	<key>ShinobiRewardedAdUnitID</key>

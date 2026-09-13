@@ -6,59 +6,127 @@ struct SettingsView: View {
     @State private var confirmingPause = false
     @State private var errorMessage: String?
 
+    private var version: String {
+        (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
+            + " (" + (Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "") + ")"
+    }
+
     var body: some View {
         NavigationStack {
-            Form {
-                Section("スクリーンタイム") {
-                    LabeledContent("利用許可", value: model.isAuthorized ? "許可済み" : "許可が必要")
-                    if !model.isAuthorized {
-                        Button("もう一度許可する") { Task { await model.authorize() } }
-                    }
-                    Text("許可の変更は、設定アプリの「スクリーンタイム」から行えます。")
-                        .font(.footnote)
-                }
-                Section("データとプライバシー") {
-                    Text("ルールとアプリの選択情報は、このiPhone内に保存します。アカウント登録は必要ありません。")
-                    Text("広告を表示すると、Googleの広告SDKがIPアドレスや広告の操作情報などを扱います。選んだアプリやルールの情報を、広告SDKへ渡すことはありません。")
-                    Link("Googleのプライバシーポリシー", destination: URL(string: "https://policies.google.com/privacy?hl=ja")!)
-                    if AdPrivacy.optionsRequired {
-                        Button("広告のプライバシー設定") {
-                            Task {
-                                do { try await AdPrivacy.showOptions() }
-                                catch { errorMessage = "広告のプライバシー設定を表示できませんでした。時間をおいてお試しください。" }
+            ScrollView {
+                VStack(alignment: .leading, spacing: 22) {
+                    ShinobiSection(title: "スクリーンタイム") {
+                        VStack(alignment: .leading, spacing: 12) {
+                            HStack {
+                                Text("利用許可").shinobiFont()
+                                Spacer()
+                                ShinobiBadge(title: model.isAuthorized ? "許可済み" : "許可が必要",
+                                             symbol: model.isAuthorized ? "checkmark" : nil, accented: model.isAuthorized)
                             }
-                        }
+                            if !model.isAuthorized {
+                                Button(model.authorizing ? "許可を確認しています" : "もう一度許可する") {
+                                    Task { await model.authorize() }
+                                }.buttonStyle(ShinobiButtonStyle()).disabled(model.authorizing)
+                                if let message = model.authorizationMessage {
+                                    Text(message).shinobiFont(13, relativeTo: .footnote).foregroundStyle(ShinobiStyle.danger)
+                                }
+                            }
+                        }.card(padding: 16)
                     }
-                }
-                Section {
-                    Button("すべてのルールを休止", role: .destructive) { confirmingPause = true }
-                } footer: { Text("すべてのロックを解除します。保存したルールは、あとから個別に有効にできます。") }
-                Section {
-                    LabeledContent("バージョン", value: (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "") + " (" + (Bundle.main.object(forInfoDictionaryKey: "CFBundleVersion") as? String ?? "") + ")")
+                    ShinobiSection(title: "データとプライバシー") {
+                        VStack(alignment: .leading, spacing: 0) {
+                            Label("ルールとアプリの選択情報は、このiPhone内に保存します。", systemImage: "iphone")
+                                .shinobiFont(13, relativeTo: .footnote).foregroundStyle(ShinobiStyle.secondary)
+                                .padding(16)
+                            // Preserve the SDK disclosure without implying all advertising data stays on device.
+                            DisclosureGroup("広告で扱う情報") {
+                                Text("広告を表示すると、Googleの広告SDKがIPアドレスや広告の操作情報などを扱います。選んだアプリやルールの情報は、広告SDKへ渡しません。")
+                                    .shinobiFont(13, relativeTo: .footnote).foregroundStyle(ShinobiStyle.muted)
+                                    .padding(.vertical, 8)
+                            }.shinobiFont(13, relativeTo: .footnote).padding(.horizontal, 16).padding(.bottom, 14)
+                            separator
+                            Link(destination: URL(string: "https://policies.google.com/privacy?hl=ja")!) {
+                                settingsRow("Googleのプライバシーポリシー", symbol: "arrow.up.forward.square")
+                            }.foregroundStyle(ShinobiStyle.text)
+                            if AdPrivacy.optionsRequired {
+                                separator
+                                Button {
+                                    Task {
+                                        do { try await AdPrivacy.showOptions() }
+                                        catch { errorMessage = "広告のプライバシー設定を表示できませんでした。時間をおいてお試しください。" }
+                                    }
+                                } label: { settingsRow("広告のプライバシー設定", symbol: "chevron.right") }
+                                    .buttonStyle(.plain)
+                            }
+                        }.card(padding: 0)
+                    }
+                    ShinobiSection(title: "ルール") {
+                        Button(role: .destructive) { confirmingPause = true } label: {
+                            settingsRow("すべてのルールを休止", symbol: "pause", destructive: true)
+                        }
+                        .buttonStyle(.plain).card(padding: 0)
+                        .disabled(model.working || !model.state.rules.contains(where: \.isEnabled))
+                    }
                     #if DEBUG
-                    NavigationLink("開発用ログ") {
+                    NavigationLink {
                         List(model.state.events.reversed()) { event in
                             VStack(alignment: .leading, spacing: 4) {
                                 Text(event.kind)
-                                Text(event.timestamp.formatted(date: .omitted, time: .standard)).font(.caption).foregroundStyle(.secondary)
-                            }
-                        }.navigationTitle("開発用ログ")
-                    }
+                                Text(event.timestamp.formatted(date: .omitted, time: .standard))
+                                    .font(.caption).foregroundStyle(.secondary)
+                            }.listRowBackground(ShinobiStyle.surface)
+                        }
+                        .scrollContentBackground(.hidden).background(ShinobiStyle.background)
+                        .navigationTitle("開発用ログ").toolbar(.visible, for: .navigationBar)
+                    } label: { Text("開発用ログ").shinobiFont(12, relativeTo: .caption).frame(minHeight: 44) }
+                        .foregroundStyle(ShinobiStyle.subdued).frame(maxWidth: .infinity)
                     #endif
+                }.padding(.horizontal, 16).padding(.top, 12).padding(.bottom, 24)
+            }
+            .shinobiScreen()
+            .safeAreaInset(edge: .top, spacing: 0) {
+                ShinobiHeader(title: "設定") { Color.clear.frame(height: 44) } trailing: {
+                    Button("完了") { dismiss() }.fontWeight(.medium).frame(minHeight: 44)
                 }
             }
-            .scrollContentBackground(.hidden).background(ShinobiStyle.paper)
-            .navigationTitle("設定").navigationBarTitleDisplayMode(.inline)
-            .toolbar { ToolbarItem(placement: .confirmationAction) { Button("完了") { dismiss() } } }
-            .confirmationDialog("すべてのルールを休止しますか？", isPresented: $confirmingPause, titleVisibility: .visible) {
-                Button("休止してロックを解除", role: .destructive) {
-                    do { try model.pauseAll() }
-                    catch { errorMessage = error.localizedDescription }
+            .safeAreaInset(edge: .bottom, spacing: 0) {
+                Text("忍びロック " + version).shinobiFont(12, relativeTo: .caption)
+                    .foregroundStyle(ShinobiStyle.subdued).frame(maxWidth: .infinity)
+                    .padding(.vertical, 16).background(ShinobiStyle.background)
+            }
+            .disabled(confirmingPause).accessibilityHidden(confirmingPause)
+            .overlay {
+                if confirmingPause {
+                    ShinobiConfirmation(title: "すべてのルールを休止しますか？",
+                                        message: pauseMessage, actionTitle: "休止してロックを解除", stacked: true,
+                                        cancel: { confirmingPause = false }) {
+                        confirmingPause = false
+                        do { try model.pauseAll() }
+                        catch { errorMessage = error.localizedDescription }
+                    }
                 }
             }
+            .interactiveDismissDisabled(confirmingPause)
             .alert("確認してください", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("閉じる", role: .cancel) { errorMessage = nil }
             } message: { Text(errorMessage ?? "") }
         }
+    }
+
+    private var pauseMessage: String {
+        model.lockedApplications.isEmpty
+            ? "すべてのルールを休止します。ルールは残ります。"
+            : "ロック中の\(model.lockedApplications.count)個のアプリがすぐ使えます。ルールは残ります。"
+    }
+    private var separator: some View { Divider().overlay(ShinobiStyle.border).padding(.horizontal, 16) }
+    private func settingsRow(_ title: String, symbol: String, destructive: Bool = false) -> some View {
+        HStack(spacing: 12) {
+            Text(title).shinobiFont().multilineTextAlignment(.leading)
+            Spacer(minLength: 0)
+            Image(systemName: symbol).font(.system(size: 16))
+                .foregroundStyle(destructive ? ShinobiStyle.danger : ShinobiStyle.subdued).accessibilityHidden(true)
+        }
+        .foregroundStyle(destructive ? ShinobiStyle.danger : ShinobiStyle.text)
+        .padding(16).frame(maxWidth: .infinity, minHeight: 52, alignment: .leading).contentShape(Rectangle())
     }
 }

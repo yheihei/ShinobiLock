@@ -58,6 +58,12 @@ assets_ref = put("assets", {
     "isa": "PBXFileReference", "lastKnownFileType": "folder.assetcatalog",
     "path": "App/Assets.xcassets", "sourceTree": "SOURCE_ROOT",
 })
+font_files = sorted(str(path.relative_to(ROOT)) for path in (ROOT / "App/Fonts").glob("*")
+                    if path.suffix == ".ttf" or path.name.endswith("-LICENSE.txt"))
+font_refs = {path: put("font." + path, {
+    "isa": "PBXFileReference", "lastKnownFileType": "file" if path.endswith(".ttf") else "text",
+    "path": path, "sourceTree": "SOURCE_ROOT",
+}) for path in font_files}
 specs = [
     ("ShinobiLock", "App/ShinobiLockApp.swift", None, None),
     ("ShieldConfiguration", "Extensions/ShieldConfiguration/ShieldConfigurationExtension.swift",
@@ -100,7 +106,9 @@ for name, source, extension_point, principal in specs:
                                    "runOnlyForDeploymentPostprocessing": "0"}),
         put(name + ".resources", {"isa": "PBXResourcesBuildPhase", "buildActionMask": "2147483647",
                                   "files": [put(name + ".privacy", {"isa": "PBXBuildFile", "fileRef": privacy_ref})]
-                                           + ([] if extension else [put("assets.build", {"isa": "PBXBuildFile", "fileRef": assets_ref})]),
+                                           + ([] if extension else [put("assets.build", {"isa": "PBXBuildFile", "fileRef": assets_ref})]
+                                              + [put("font.build." + path, {"isa": "PBXBuildFile", "fileRef": ref})
+                                                 for path, ref in font_refs.items()]),
                                   "runOnlyForDeploymentPostprocessing": "0"}),
     ]
     if not extension:
@@ -163,6 +171,7 @@ for name, source, extension_point, principal in specs:
                                "NSExtensionPrincipalClass": "$(PRODUCT_MODULE_NAME)." + principal}
     else:
         info.update({"CFBundleDisplayName": "忍びロック", "LSRequiresIPhoneOS": True,
+                     "UIAppFonts": [Path(path).name for path in font_files if path.endswith(".ttf")],
                      "GADApplicationIdentifier": "$(SHINOBI_ADMOB_APP_ID)",
                      "ShinobiRewardedAdUnitID": "$(SHINOBI_REWARDED_AD_UNIT_ID)",
                      "GADDelayAppMeasurementInit": True,
@@ -179,7 +188,7 @@ put("embedReport", {"isa": "PBXCopyFilesBuildPhase", "buildActionMask": "2147483
                     "files": report_embeds, "name": "Embed ExtensionKit Extensions",
                     "runOnlyForDeploymentPostprocessing": "0"})
 product_group = put("products", {"isa": "PBXGroup", "children": products, "name": "Products", "sourceTree": "<group>"})
-main_group = put("main", {"isa": "PBXGroup", "children": [config_ref, privacy_ref, assets_ref] + list(source_refs.values()) + [product_group],
+main_group = put("main", {"isa": "PBXGroup", "children": [config_ref, privacy_ref, assets_ref] + list(font_refs.values()) + list(source_refs.values()) + [product_group],
                           "sourceTree": "<group>"})
 project_configs = []
 for configuration in ["Debug", "Release"]:

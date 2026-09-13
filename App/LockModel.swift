@@ -8,6 +8,8 @@ final class LockModel: ObservableObject {
     @Published private(set) var state = ProbeState()
     @Published private(set) var authorization = AuthorizationCenter.shared.authorizationStatus
     @Published private(set) var working = false
+    @Published private(set) var authorizing = false
+    @Published private(set) var authorizationMessage: String?
     @Published var errorMessage: String?
     private var lastEvidence: Data?
 
@@ -41,12 +43,16 @@ final class LockModel: ObservableObject {
     }
 
     func authorize() async {
+        guard !authorizing else { return }
+        authorizing = true
+        authorizationMessage = nil
+        defer { authorizing = false }
         do {
             try await AuthorizationCenter.shared.requestAuthorization(for: .individual)
             synchronize()
         } catch {
             refresh()
-            errorMessage = "スクリーンタイムを許可できませんでした。設定アプリの「スクリーンタイム」から、忍びロックのアクセスを確認してください。"
+            authorizationMessage = "iPhoneの設定 › スクリーンタイムで、忍びロックのアクセスを確認してください。"
         }
     }
 
@@ -99,7 +105,8 @@ extension LockRule {
 
     var dayText: String {
         if schedule.weekdays == Set(1...7) { return "毎日" }
-        if schedule.weekdays == Set(2...6) { return "平日" }
+        if schedule.weekdays == Set(2...6) { return "月〜金" }
+        if schedule.weekdays == Set([1, 7]) { return "土・日" }
         return [2, 3, 4, 5, 6, 7, 1].filter { schedule.weekdays.contains($0) }.map { Self.dayName($0) }.joined(separator: "・")
     }
 

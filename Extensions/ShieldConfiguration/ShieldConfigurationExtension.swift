@@ -7,17 +7,19 @@ final class ShieldConfigurationExtension: ShieldConfigurationDataSource {
         // The physical-device probe returned EPERM when this extension tried to
         // write to the App Group. Keep configuration free of persistence or IPC.
         // Configuration calls are not a documented app-open counter either.
-        let ink = UIColor(red: 0.13, green: 0.19, blue: 0.18, alpha: 1)
-        let paper = UIColor(red: 0.96, green: 0.95, blue: 0.90, alpha: 1)
+        let text = UIColor(red: 233 / 255, green: 233 / 255, blue: 237 / 255, alpha: 1)
+        let background = UIColor(red: 22 / 255, green: 24 / 255, blue: 38 / 255, alpha: 1)
+        let accent = UIColor(red: 210 / 255, green: 206 / 255, blue: 253 / 255, alpha: 1)
+        let button = UIColor(red: 121 / 255, green: 108 / 255, blue: 191 / 255, alpha: 1)
         return ShieldConfiguration(
-            backgroundBlurStyle: .systemMaterialLight,
-            backgroundColor: paper,
-            icon: UIImage(systemName: "lock.shield.fill")?.withTintColor(ink, renderingMode: .alwaysOriginal),
-            title: .init(text: "忍びロック", color: ink),
-            subtitle: .init(text: "\(application.localizedDisplayName ?? "このアプリ")はロックされています。\n大切な時間を、守ろう。", color: ink),
-            primaryButtonLabel: .init(text: "閉じる", color: paper),
-            primaryButtonBackgroundColor: ink,
-            secondaryButtonLabel: .init(text: "広告を見て5分使う", color: ink)
+            backgroundBlurStyle: .systemMaterialDark,
+            backgroundColor: background,
+            icon: UIImage(systemName: "lock.shield")?.withTintColor(accent, renderingMode: .alwaysOriginal),
+            title: .init(text: "忍びロック", color: text),
+            subtitle: .init(text: "\(application.localizedDisplayName ?? "このアプリ")はロックされています。\n大切な時間を、守ろう。", color: text),
+            primaryButtonLabel: .init(text: "閉じる", color: text),
+            primaryButtonBackgroundColor: button,
+            secondaryButtonLabel: .init(text: "広告を見て5分使う", color: accent)
         )
     }
 }

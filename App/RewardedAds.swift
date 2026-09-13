@@ -43,6 +43,7 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
     @Published private(set) var presenting = false
     @Published private(set) var granted = false
     @Published private(set) var message: String?
+    @Published private(set) var failed = false
     private var ad: RewardedAd?
     private var gate = RewardGate()
 
@@ -51,6 +52,7 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
         busy = true
         granted = false
         message = nil
+        failed = false
         let attempt = gate.begin()
         do {
             guard eligible() else { throw AdError.noLongerLocked }
@@ -75,11 +77,15 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
                 do {
                     try reward()
                     self.granted = true
-                } catch { self.message = error.localizedDescription }
+                } catch {
+                    self.message = error.localizedDescription
+                    self.failed = true
+                }
             }
         } catch {
             finish()
             if !(error is CancellationError) {
+                failed = true
                 message = (error as? AdError)?.localizedDescription ?? AdError.unavailable.localizedDescription
                 #if DEBUG
                 print("Rewarded ad failed: \(error.localizedDescription)")
@@ -94,6 +100,7 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
     }
 
     func ad(_ ad: FullScreenPresentingAd, didFailToPresentFullScreenContentWithError error: Error) {
+        failed = true
         message = AdError.unavailable.localizedDescription
         finish()
     }

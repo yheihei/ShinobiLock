@@ -37,6 +37,24 @@
 			path = "App/Assets.xcassets";
 			sourceTree = "SOURCE_ROOT";
 		};
+		60BA51A5A847BE5D626E9A56 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "text";
+			path = "App/Fonts/Inter-LICENSE.txt";
+			sourceTree = "SOURCE_ROOT";
+		};
+		1B547CD2AFB15ADF4765D858 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "file";
+			path = "App/Fonts/Inter-Medium.ttf";
+			sourceTree = "SOURCE_ROOT";
+		};
+		15C5B5176EEF0F5CFDFA8644 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "file";
+			path = "App/Fonts/Inter-Regular.ttf";
+			sourceTree = "SOURCE_ROOT";
+		};
 		054155753924768D9F552BFD = {
 			isa = "PBXFileReference";
 			lastKnownFileType = "sourcecode.swift";
@@ -89,6 +107,12 @@
 			isa = "PBXFileReference";
 			lastKnownFileType = "sourcecode.swift";
 			path = "App/ShinobiLockApp.swift";
+			sourceTree = "SOURCE_ROOT";
+		};
+		0BF8A0AF53C426F697A45D0F = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "App/ShinobiStyle.swift";
 			sourceTree = "SOURCE_ROOT";
 		};
 		717B923FF20C96BAD5403FCA = {
@@ -158,6 +182,10 @@
 			isa = "PBXBuildFile";
 			fileRef = "C875008F742D7D042A7E87F8";
 		};
+		1B5307178BB46157B19C9AFD = {
+			isa = "PBXBuildFile";
+			fileRef = "0BF8A0AF53C426F697A45D0F";
+		};
 		A891489154D5F8C3CE956657 = {
 			isa = "PBXBuildFile";
 			fileRef = "717B923FF20C96BAD5403FCA";
@@ -175,6 +203,7 @@
 				"4B14660C1A9D159D16040DF1",
 				"5CB0AD151F537AC39404CF6D",
 				"CCD6769F2FCD5A19FB22BFD8",
+				"1B5307178BB46157B19C9AFD",
 				"A891489154D5F8C3CE956657",
 			);
 			runOnlyForDeploymentPostprocessing = "0";
@@ -199,12 +228,27 @@
 			isa = "PBXBuildFile";
 			fileRef = "8BF729FFE074CAEE622C0292";
 		};
+		7467239CD6FAC4C1D033AD61 = {
+			isa = "PBXBuildFile";
+			fileRef = "60BA51A5A847BE5D626E9A56";
+		};
+		D6070A07AE3069EEE2990839 = {
+			isa = "PBXBuildFile";
+			fileRef = "1B547CD2AFB15ADF4765D858";
+		};
+		9636DD7F3F640397F8A4DDC3 = {
+			isa = "PBXBuildFile";
+			fileRef = "15C5B5176EEF0F5CFDFA8644";
+		};
 		98E0239E52E7524FFC34821F = {
 			isa = "PBXResourcesBuildPhase";
 			buildActionMask = "2147483647";
 			files = (
 				"91BE63C35092265B0E92E98E",
 				"53D1B124C3CFA512382233B6",
+				"7467239CD6FAC4C1D033AD61",
+				"D6070A07AE3069EEE2990839",
+				"9636DD7F3F640397F8A4DDC3",
 			);
 			runOnlyForDeploymentPostprocessing = "0";
 		};
@@ -782,6 +826,9 @@
 				"B79606FB3AFEA5BD1609ED40",
 				"A4CC6BC01A927E2A78FD3BEC",
 				"8BF729FFE074CAEE622C0292",
+				"60BA51A5A847BE5D626E9A56",
+				"1B547CD2AFB15ADF4765D858",
+				"15C5B5176EEF0F5CFDFA8644",
 				"054155753924768D9F552BFD",
 				"336BE68FD0696AC6A4E5459B",
 				"883562D1FA3ACBF1619B4C2F",
@@ -791,6 +838,7 @@
 				"62C267B261F4D9C899EE6AA8",
 				"26784887E03A250B06027F4D",
 				"C875008F742D7D042A7E87F8",
+				"0BF8A0AF53C426F697A45D0F",
 				"717B923FF20C96BAD5403FCA",
 				"1A0E3C95E377DABF7CC182AB",
 				"BE728FA1A27D41BB16855828",
