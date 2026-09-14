@@ -4,26 +4,76 @@ import UserMessagingPlatform
 import UIKit
 
 enum AdConfiguration {
+    static let testAppID = "ca-app-pub-3940256099942544~1458002511"
     static let testUnitID = "ca-app-pub-3940256099942544/1712485313"
-    static var unitID: String { Bundle.main.object(forInfoDictionaryKey: "ShinobiRewardedAdUnitID") as? String ?? "" }
+    static var appID: String { Bundle.main.object(forInfoDictionaryKey: "GADApplicationIdentifier") as? String ?? "" }
+    static var unitID: String {
+        #if DEBUG
+        // Device testing must never generate live ad impressions.
+        return testUnitID
+        #else
+        return Bundle.main.object(forInfoDictionaryKey: "ShinobiRewardedAdUnitID") as? String ?? ""
+        #endif
+    }
     static var usesTestAds: Bool { unitID == testUnitID }
+    static var usesGoogleTestApplication: Bool { appID == testAppID && usesTestAds }
 }
 
 @MainActor
-enum AdPrivacy {
-    static var optionsRequired: Bool { ConsentInformation.shared.privacyOptionsRequirementStatus == .required }
+final class AdPrivacy: ObservableObject {
+    static let shared = AdPrivacy()
+    @Published private(set) var optionsRequired = false
+    private var updateTask: Task<Void, Error>?
 
-    static func prepare() async throws {
+    private init() {}
+
+    func refreshAtLaunch() async {
+        do { try await refreshConsentInformation() }
+        catch {
+            #if DEBUG
+            print("Consent update failed: \(error.localizedDescription)")
+            #endif
+        }
+    }
+
+    private func refreshConsentInformation() async throws {
         // Google's shared test application has no publisher consent message configured.
-        // Only its official test unit can take this path. Real ads always use UMP.
-        if AdConfiguration.usesTestAds { return }
-        try await ConsentInformation.shared.requestConsentInfoUpdate(with: RequestParameters())
-        try await ConsentForm.loadAndPresentIfRequired(from: nil)
+        // A publisher's app ID still uses UMP when displaying test ads.
+        if AdConfiguration.usesGoogleTestApplication { return }
+        if let updateTask { return try await updateTask.value }
+        let task = Task {
+            try await ConsentInformation.shared.requestConsentInfoUpdate(with: RequestParameters())
+        }
+        updateTask = task
+        defer {
+            updateTask = nil
+            updateOptionsRequirement()
+        }
+        try await task.value
+    }
+
+    func prepare() async throws {
+        if AdConfiguration.usesGoogleTestApplication { return }
+        defer { updateOptionsRequirement() }
+        do {
+            try await refreshConsentInformation()
+            try Task.checkCancellation()
+            try await ConsentForm.loadAndPresentIfRequired(from: nil)
+        } catch {
+            if error is CancellationError { throw error }
+            // UMP may authorize requests using consent from the previous session.
+            guard ConsentInformation.shared.canRequestAds else { throw error }
+        }
         guard ConsentInformation.shared.canRequestAds else { throw AdError.unavailable }
     }
 
-    static func showOptions() async throws {
+    func showOptions() async throws {
+        defer { updateOptionsRequirement() }
         try await ConsentForm.presentPrivacyOptionsForm(from: nil)
+    }
+
+    private func updateOptionsRequirement() {
+        optionsRequired = ConsentInformation.shared.privacyOptionsRequirementStatus == .required
     }
 }
 
@@ -66,9 +116,10 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
         do {
             guard eligible() else { throw AdError.noLongerLocked }
             guard !AdConfiguration.unitID.isEmpty else { throw AdError.unavailable }
-            try await AdPrivacy.prepare()
+            try await AdPrivacy.shared.prepare()
             try Task.checkCancellation()
             MobileAds.shared.requestConfiguration.setPublisherFirstPartyIDEnabled(false)
+            MobileAds.shared.requestConfiguration.maxAdContentRating = .general
             await MobileAds.shared.start()
             let request = Request()
             let extras = Extras()

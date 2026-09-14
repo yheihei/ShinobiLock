@@ -2,7 +2,7 @@
 
 カルマロックは、使いすぎを控えたいiPhoneアプリを、指定した曜日と時間帯にロックするアプリです。一時的に使いたいときは、リワード広告を視聴すると対象アプリだけを5分間解除できます。
 
-現在は実機検証中の開発版です。Googleの公式テスト広告を使用しています。
+現在はApp Store公開の準備中です。ReleaseはカルマロックのAdMob広告IDを使用し、DebugはGoogleの公式テスト広告を表示します。
 
 ## 主な機能
 
@@ -44,24 +44,28 @@ DEVELOPER_DIR=/Applications/Xcode.app/Contents/Developer xcodebuild \
 
 2026年9月12日の試作では、iPhone 12 mini / iOS 26.6.2でロック画面の表示、本体への移動、解除対象アプリの引き継ぎを確認しました。バックグラウンド中の再ロックは1回、開始から約5分2秒で動作しました。
 
-週間ルールと広告フロー、複数アプリの個別解除、本体強制終了・再起動・時刻変更後の動作は、実機での検証が完了していません。詳しい結果と未確認項目は[実機検証記録](docs/device-verification.md)を参照してください。
+2026年9月14日には、実機で広告中断時のロック継続、視聴完了後の対象アプリだけの解除、本体終了後の5分再ロックをユーザーが確認しました。診断ログの期限通知は解除開始から約301秒でした。端末再起動・時刻変更・実際の通信断などの条件は未確認です。詳しい結果は[実機検証記録](docs/device-verification.md)を参照してください。
 
 自動テストでは、週間ルールの重なり、アプリ件数の上限、期限の境界と時計変更、広告の重複・古いコールバック、カルマの台詞を検査します。OS通知の配信と再ロックのタイミングは実機での確認が必要です。
 
 ## データと広告
 
-アプリの選択トークンやルールはAdMobへ渡しません。広告SDK自体は広告配信に必要な情報を扱います。広告リクエストでは非パーソナライズを指定し、Publisher First-party IDを無効にしています。本番ID使用時はUMPで同意状態を確認してから広告を要求します。Googleの共有テストアプリIDには同意メッセージ設定がないため、公式テストユニットに限ってその確認を省略します。
+アプリの選択トークンやルールはAdMobへ渡しません。広告SDK自体は広告配信に必要な情報を扱います。広告リクエストでは非パーソナライズを指定し、Publisher First-party IDを無効にしています。本番ID使用時はUMPで同意状態を確認してから広告を要求します。Googleの共有テストアプリIDと公式テスト広告ユニットを同時に使う場合だけ、その確認を省略します。
 
 SDKの`PrivacyInfo.xcprivacy`は各フレームワークに含まれます。
 
 ## 公開前の準備
 
-本番のAdMob IDとFamily Controls配布権限は未設定です。広告による解除を含むApp Store審査も未実施です。公開前に以下を準備してください。
+2026年9月14日に本番のAdMobアプリ・リワード広告ユニットを作成しました。Family Controls配布権限は申請済みで、Appleの審査待ちです。AdMobアカウントもGoogleの審査待ちです。広告による解除を含むApp Store審査は未実施です。
 
-- AdMobの本番IDとプライバシーメッセージの設定
-- 公開プライバシーポリシーと、広告SDKの収集内容を含むApp Storeのプライバシー回答
-- 本体と各Screen Time拡張のFamily Controls配布権限
-- 週間ルール、一時解除、再ロックの実機検証
+- AdMobアカウントの承認と、公開後のストア情報の紐付け・アプリ確認
+- 入力・保存済みのApp Storeプライバシー回答の最終公開
+- 本体と各Screen Time拡張のFamily Controls配布権限の有効化
+- ビルドのアップロードとApp Store審査提出
+
+[サポートページ](https://yheihei.github.io/karma-lock/)と[プライバシーポリシー](https://yheihei.github.io/karma-lock/privacy.html)を公開しています。公開用の元ファイルは`docs/site/`、配信先は`yheihei/yheihei.github.io`です。AdMobの欧州向け同意メッセージは英語・日本語で公開済みです。
+
+起動時にUMPの同意情報を更新し、広告視聴を選んだときに必要な同意画面を表示します。本番アプリIDを使うDebugビルドでもUMPの処理を通します。Googleの共有テストアプリIDとテスト広告ユニットを同時に使う場合だけ、その確認を省略します。
 
 ## 関連資料
 
@@ -70,5 +74,6 @@ SDKの`PrivacyInfo.xcprivacy`は各フレームワークに含まれます。
 - [一時解除の操作と画面仕様](docs/unlock-intent.md)
 - [初期要件定義書](docs/app_lock_mvp_requirements.md)
 - [実機検証記録](docs/device-verification.md)
+- [App Store公開準備](docs/app-store-release.md)
 - [画面と操作の説明](docs/design-reference/README.md)
 - [カルマの間の画面と素材](docs/karma-room.md)

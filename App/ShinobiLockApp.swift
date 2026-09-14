@@ -34,6 +34,7 @@ struct HomeView: View {
                 }
             }
         }
+        .task { await AdPrivacy.shared.refreshAtLaunch() }
         .task(id: scenePhase) {
             guard scenePhase == .active else { return }
             model.synchronize()

@@ -2,6 +2,7 @@ import SwiftUI
 
 struct SettingsView: View {
     @ObservedObject var model: LockModel
+    @ObservedObject private var adPrivacy = AdPrivacy.shared
     @Environment(\.dismiss) private var dismiss
     @State private var errorMessage: String?
     @State private var showingOnboarding = false
@@ -64,14 +65,18 @@ struct SettingsView: View {
                                     .padding(.vertical, 8)
                             }.shinobiFont(13, relativeTo: .footnote).padding(.horizontal, 16).padding(.bottom, 14)
                             separator
+                            Link(destination: URL(string: "https://yheihei.github.io/karma-lock/privacy.html")!) {
+                                settingsRow("カルマロックのプライバシーポリシー", symbol: "arrow.up.forward.square")
+                            }.foregroundStyle(ShinobiStyle.text)
+                            separator
                             Link(destination: URL(string: "https://policies.google.com/privacy?hl=ja")!) {
                                 settingsRow("Googleのプライバシーポリシー", symbol: "arrow.up.forward.square")
                             }.foregroundStyle(ShinobiStyle.text)
-                            if AdPrivacy.optionsRequired {
+                            if adPrivacy.optionsRequired {
                                 separator
                                 Button {
                                     Task {
-                                        do { try await AdPrivacy.showOptions() }
+                                        do { try await adPrivacy.showOptions() }
                                         catch { errorMessage = "広告のプライバシー設定を表示できませんでした。時間をおいてお試しください。" }
                                     }
                                 } label: { settingsRow("広告のプライバシー設定", symbol: "chevron.right") }

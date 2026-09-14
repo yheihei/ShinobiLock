@@ -182,7 +182,8 @@ for name, source, extension_point, principal in specs:
                      "GADApplicationIdentifier": "$(SHINOBI_ADMOB_APP_ID)",
                      "ShinobiRewardedAdUnitID": "$(SHINOBI_REWARDED_AD_UNIT_ID)",
                      "GADDelayAppMeasurementInit": True,
-                     "SKAdNetworkItems": [{"SKAdNetworkIdentifier": "cstr6suwn9.skadnetwork"}],
+                     "SKAdNetworkItems": [{"SKAdNetworkIdentifier": identifier} for identifier in
+                                          json.loads((ROOT / "Config/AdNetworkIdentifiers.json").read_text())],
                      "UILaunchScreen": {}, "UISupportedInterfaceOrientations": ["UIInterfaceOrientationPortrait"],
                      "UIApplicationSceneManifest": {"UIApplicationSupportsMultipleScenes": False}})
     write_plist("Config/" + name + "-Info.plist", info)
