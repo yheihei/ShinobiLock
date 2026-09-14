@@ -103,10 +103,22 @@
 			path = "App/LockModel.swift";
 			sourceTree = "SOURCE_ROOT";
 		};
+		D6AEB21F842D664D51957399 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "App/OnboardingView.swift";
+			sourceTree = "SOURCE_ROOT";
+		};
 		5C365629ACB454548DA40A72 = {
 			isa = "PBXFileReference";
 			lastKnownFileType = "sourcecode.swift";
 			path = "App/RewardedAds.swift";
+			sourceTree = "SOURCE_ROOT";
+		};
+		C0B6BB9AEDF9253B15B7F172 = {
+			isa = "PBXFileReference";
+			lastKnownFileType = "sourcecode.swift";
+			path = "App/RuleActionView.swift";
 			sourceTree = "SOURCE_ROOT";
 		};
 		62C267B261F4D9C899EE6AA8 = {
@@ -192,9 +204,17 @@
 			isa = "PBXBuildFile";
 			fileRef = "E1B7608E064AD7D99B502A4A";
 		};
+		D382DA850ABAAA61EFDB6BBF = {
+			isa = "PBXBuildFile";
+			fileRef = "D6AEB21F842D664D51957399";
+		};
 		3AB20F4B8F8FD44E751A21D0 = {
 			isa = "PBXBuildFile";
 			fileRef = "5C365629ACB454548DA40A72";
+		};
+		FA7EF15CAF92FC456ED1248D = {
+			isa = "PBXBuildFile";
+			fileRef = "C0B6BB9AEDF9253B15B7F172";
 		};
 		4B14660C1A9D159D16040DF1 = {
 			isa = "PBXBuildFile";
@@ -227,7 +247,9 @@
 				"C34C98C5CBE6D16D6BC3C044",
 				"87B342DBA75C3BD2FB76FA66",
 				"CF7BF2595B85010627959AFC",
+				"D382DA850ABAAA61EFDB6BBF",
 				"3AB20F4B8F8FD44E751A21D0",
+				"FA7EF15CAF92FC456ED1248D",
 				"4B14660C1A9D159D16040DF1",
 				"5CB0AD151F537AC39404CF6D",
 				"CCD6769F2FCD5A19FB22BFD8",
@@ -885,7 +907,9 @@
 				"142FAEFEAEC1EAE29D7D812E",
 				"BC004E9E743FD14FC2505069",
 				"E1B7608E064AD7D99B502A4A",
+				"D6AEB21F842D664D51957399",
 				"5C365629ACB454548DA40A72",
+				"C0B6BB9AEDF9253B15B7F172",
 				"62C267B261F4D9C899EE6AA8",
 				"26784887E03A250B06027F4D",
 				"C875008F742D7D042A7E87F8",

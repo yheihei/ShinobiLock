@@ -1,0 +1,106 @@
+{
+  "app": "忍びロック",
+  "version": "0.1.0 (8)",
+  "source_revision": "d969d8b",
+  "captured_on": "2026-09-12",
+  "device": "iPhone 17 Pro Simulator",
+  "os": "iOS 26.5",
+  "screenshots": [
+    {
+      "file": "screenshots/01-permission.png",
+      "title": "初回ホーム・許可前",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "331dbcb1182e2b337c509c31581b3e16d0e49057ac7b271603d93b943a538d67"
+    },
+    {
+      "file": "screenshots/02-empty.png",
+      "title": "許可済み・ルールなし",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "bdf6bb3ecd26c77de114048897c9a1e87b935d4b50ee52d7ffe1b1dad5bd5038"
+    },
+    {
+      "file": "screenshots/03-home.png",
+      "title": "ホーム・ルールあり",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "9880a0db074ed0bb2d58ae27eff4bfb54fc750903320a86320c411cf62e0605a"
+    },
+    {
+      "file": "screenshots/04-new-rule.png",
+      "title": "ルール作成",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "de57e8447ba0474de0ddd79caf835a0a2f4b4fbad24822604c9b154f9263e2f0"
+    },
+    {
+      "file": "screenshots/05-edit-rule.png",
+      "title": "ルール編集・アプリ一覧・下部",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "abcd50bf8b253c91e4c1cf880b211b3b4a9916b4d4d0df2a4e45ed6d6029ba5b"
+    },
+    {
+      "file": "screenshots/06-unlock.png",
+      "title": "5分解除の説明",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "ec9ae4dfaf5aa624ae28c7f4a3e942e5fe772a1199447866f46789d522ea10ed"
+    },
+    {
+      "file": "screenshots/07-granted.png",
+      "title": "解除完了",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "2da2614ca75e0be71b767d3a880fdd75f3961b04111630edfdba1bfd31503747"
+    },
+    {
+      "file": "screenshots/08-access.png",
+      "title": "ホーム・一時解除中",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "845052d3dce4804bf9626d821ce2d84fa289d97fefe937abafa3f5122c35a90c"
+    },
+    {
+      "file": "screenshots/09-settings.png",
+      "title": "設定",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "116ac3febbba9922070d3558df3716b57a47f09e261adefcd9c81a9145fd5e15"
+    },
+    {
+      "file": "screenshots/10-ad-error.png",
+      "title": "広告の表示失敗",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "92af91f125f2452887ebdeced225879005d08ad363a79a9a9276c60f4e03547d"
+    },
+    {
+      "file": "screenshots/11-delete-confirmation.png",
+      "title": "ルール削除の確認",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "8a98626242b28a497957879def37052e9d7e1a5dfe665a422d48900eeed2d5ce"
+    },
+    {
+      "file": "screenshots/12-pause-confirmation.png",
+      "title": "全ルール休止の確認",
+      "width": 1206,
+      "height": 2622,
+      "capture_type": "現行SwiftUI画面のシミュレータ撮影。状態と対象アプリの表示は撮影用サンプル。",
+      "sha256": "666eb9fbeec64df305907fbdf147c5466296f2f2ab3a7daff2d6200524c86f87"
+    }
+  ]
+}

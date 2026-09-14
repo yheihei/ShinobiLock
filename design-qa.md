@@ -45,4 +45,67 @@
 - 作成・編集・設定・解除の実機表示と操作。iPhoneミラーリングが未設定のため、エージェントによる操作と撮影は未実施。
 - 実機でのFamilyActivityPicker、スクリーンタイム許可、Shield、広告配信と再ロック。
 
-final result: blocked。元デザインの画像取得ができず、画像比較の検証は未完了。利用者による更新版の確認とpushの承認は取得済み。
+2026年9月13日の結果: blocked。元デザインの画像取得ができず、画像比較の検証は未完了。利用者による更新版の確認とpushの承認は取得済み。
+
+
+# 2026年9月14日: オンボーディング
+
+## 参照と確認範囲
+
+- source visual truth: `/Users/yhei/Downloads/Shinobi Lock3.html` の4a〜4e。HTMLと同梱JSON、PNGを読み取り。
+- 参照ビューポート: 402 × 874 pt。4fの375 × 667 pt用の横並びは、今回の利用者の指示に従い採用せず、同じ縦並びを使用。
+- source capture: 取得できず。`file://` を開く操作がブラウザのURLポリシーで拒否された。代替ブラウザやHTTP配信などで迂回していない。
+- implementation screenshots: `output/onboarding/01-introduction-iphone17pro.png`、`02-rules-iphone17pro.png`、`03-unlock-iphone17pro.png`、`04-finish-iphone17pro.png`、`05-settings-iphone17pro.png`。
+- 実装の通常サイズ: 402 × 874 pt、保存画像1206 × 2622 px、3倍密度。Simulatorの端末画面だけを保存。
+- 実装の小型サイズ: 375 × 667 pt、保存画像750 × 1334 px、2倍密度。画像は `output/onboarding/06-introduction-iphonese.png`、`07-unlock-iphonese.png`、`08-rules-scrolled-iphonese.png`。
+- state: 初回案内1〜4、スクリーンタイム未許可のホームと設定、設定からの再表示。
+- full-view comparison: blocked。実装の全画面は確認したが、参照画面を取得できていないため同時比較を実施できない。
+- focused comparison: blocked。同じ理由で字体・余白・画像の部分比較も未実施。参照側のピクセル寸法・密度は不明なので、画像比較用の正規化は行っていない。
+
+## 表示の確認
+
+- Fonts and typography: 既存のInterと日本語のiOSフォールバックを使用。台詞21pt、カルマ11pt。通常サイズで4画面の台詞が切れずに表示されることを確認。
+- Spacing and layout rhythm: 水平余白24pt、画像320ptまたは200pt、4個のページ表示、下部の52ptボタンを実装。小型でも縦並びを保ち、本文のみスクロールする。
+- Colors and visual tokens: 既存の背景 `#161826`、surface `#232532`、accent `#9184d9` を使用。条件説明の瞳アイコンに赤を使用。参照にある足元の淡い光は未再現。
+- Image quality and asset fidelity: HTMLの透過PNG2枚をそのまま使用し、元ファイルとのSHA-256一致を確認。締めのページだけ全身画像を左右反転。既存のカルマの間の画像は変更していない。
+- Copy and content: 同梱JSONのonboarding4本をそのまま追加。既存の解除・休止・削除台詞は維持。見本カードはルールを作らない。ネイティブのToggleとSF Symbolsを使用。
+
+## 動作とビルド
+
+- Swift Packageの25件のテストが成功。XCTest 11件、Swift Testing 14件。追加テストは古い・一部空の台詞カタログの補完と、同梱4ページ・画像の存在を検査。
+- iOS Simulator向けビルドと、iOS実機向け署名付きビルドが成功。実機へのインストールと実機操作は今回実施していない。
+- 新規コードのコンパイル警告は解消。ビルド全体にはAppIntents未使用、署名済みバイナリのstrip省略、Simulatorのx86_64向けSDKラッパーに関する警告が残る。操作確認はarm64で実施。
+- 通常サイズで「つぎへ」による4画面の遷移、最終画面のスキップ非表示、「はじめる」からホームへの遷移を確認。
+- 3画面目で終了し再起動すると1画面目に戻る。完了後は再起動・上書きインストールでもホームを表示。
+- 設定の「案内をもう一度見る」から再表示し、上部の「閉じる」と最終画面の「閉じる」の両方で設定に戻ることを確認。
+- 初回の署名なしSimulatorビルドではホームに共有領域エラーが出た。署名付きSimulatorビルドで解消。アプリ内のデータ保存・権限処理にバイパスは追加していない。
+- 小型サイズで同じ縦並びの4画面を確認。ルール説明は本文をスクロールするとカードの曜日・件数・バッジと補足3項目を読める。主ボタンは固定され、次のページでは本文が先頭に戻る。
+- 小型サイズの3画面目でスキップするとホームへ進み、再起動しても案内が再表示されない。設定からは再表示できる。
+- `git diff --check` とXcodeプロジェクトのplist検証が成功。
+
+## 比較履歴と残る確認
+
+画像比較は参照取得の段階でblocked。実装画面を見たことやビルド成功を、参照デザインとの一致確認として扱わない。足元の淡い光はP3の差分として残る。許可ダイアログ、広告の視聴、ロック・再ロックは今回のオンボーディング検証の対象外。
+
+final result: blocked
+
+# 2026年9月14日: カルマの案内のセリフと立ち絵の刷新
+
+## 参照と確認範囲
+
+- source visual truth: 参照デザインの更新はなし。NINJAMCPの `get_character` `get_character_image` `search_lore` `get_worldview` で取得したカルマの公式設定と公式2D・3D画像。
+- implementation screenshots: `output/onboarding-portraits/qa/simulator/01-intro-iphone17pro.png`、`02-rules-iphone17pro.png`、`03-unlock-iphone17pro.png`、`04-farewell-iphone17pro.png`。402 × 874 pt、3倍密度。
+- state: 初回案内1〜4。2〜4ページは、開始ページを環境変数で指定する一時変更を入れて撮影し、撮影後に元へ戻した。Simulatorの画面操作は今回許可されなかった。
+
+## 表示の確認
+
+- Copy and content: `onboarding` の4本をクールなツンデレの口調に差し替え。各行は全角16字以内で、通常サイズでは各行が折り返さない。3ページ目は本人が解除を選んだときの条件だけを述べ、利用を勧めない。
+- Image quality and asset fidelity: Codexの画像生成で作った4点を透過化して登録。暗色・明色背景で四辺の透明と緑フリンジの除去を確認。ピアスは本人の右耳、鬼面の肩当ては右肩。旧2点は削除し、設定の「案内をもう一度見る」の絵は導入の絵に変更。
+- Spacing and layout rhythm: 画像サイズ、余白、ボタンは変更なし。締めの絵は左右反転をやめた。
+
+## 動作とビルド
+
+- Swift Packageの25件のテストが成功。画像の存在確認は新しい4点に更新。
+- iOS Simulator向けビルドが成功。実機のロックと広告視聴後の解除は今回の対象外。
+
+final result: passed

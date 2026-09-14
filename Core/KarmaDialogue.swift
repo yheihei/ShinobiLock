@@ -51,6 +51,7 @@ struct KarmaDialogueCatalog: Decodable {
     let pauseBeforeAd: [String]
     let deleteBeforeAd: [String]
     let ruleStayed: [String]
+    let onboarding: [String]
 
     enum CodingKeys: String, CodingKey {
         case unlockBeforeAd = "unlock_before_ad"
@@ -58,15 +59,17 @@ struct KarmaDialogueCatalog: Decodable {
         case pauseBeforeAd = "pause_before_ad"
         case deleteBeforeAd = "delete_before_ad"
         case ruleStayed = "rule_stayed"
+        case onboarding
     }
 
     init(unlockBeforeAd: [String], stayed: [String], pauseBeforeAd: [String] = [],
-         deleteBeforeAd: [String] = [], ruleStayed: [String] = []) {
+         deleteBeforeAd: [String] = [], ruleStayed: [String] = [], onboarding: [String] = []) {
         self.unlockBeforeAd = unlockBeforeAd
         self.stayed = stayed
         self.pauseBeforeAd = pauseBeforeAd
         self.deleteBeforeAd = deleteBeforeAd
         self.ruleStayed = ruleStayed
+        self.onboarding = onboarding
     }
 
     init(from decoder: Decoder) throws {
@@ -76,6 +79,7 @@ struct KarmaDialogueCatalog: Decodable {
         pauseBeforeAd = try values.decodeIfPresent([String].self, forKey: .pauseBeforeAd) ?? []
         deleteBeforeAd = try values.decodeIfPresent([String].self, forKey: .deleteBeforeAd) ?? []
         ruleStayed = try values.decodeIfPresent([String].self, forKey: .ruleStayed) ?? []
+        onboarding = try values.decodeIfPresent([String].self, forKey: .onboarding) ?? []
     }
 
     static let fallback = KarmaDialogueCatalog(
@@ -83,8 +87,24 @@ struct KarmaDialogueCatalog: Decodable {
         stayed: ["……そうか。\n今日は、鎖を握ったままか。"],
         pauseBeforeAd: ["……この約束を、休ませるのか。\n決めたときの理由を、覚えているか？"],
         deleteBeforeAd: ["……この約束を、消すのか。\nここで守りたかった時間は、どうする？"],
-        ruleStayed: ["……そうか。\nおまえの決めたこと、ここに残しておく。"]
+        ruleStayed: ["……そうか。\nおまえの決めたこと、ここに残しておく。"],
+        onboarding: [
+            "……何だ、おまえか。\nカルマだ。おまえの時間を見張る。\n勘違いするな。暇だっただけだ。",
+            "曜日と時間を決め、アプリを縛る。\nそれが「ルール」だ。簡単だろう。\n……まずは一つ。倒れたら困る。",
+            "どうしてもと言うなら広告を見ろ。\n5分だけ、鎖を緩めてやる。\nその無様な顔は覚えておくがな。",
+            "……話は終わりだ。行け。\nあとは、おまえが決めればいい。\n守れたら、褒めてやらなくもない。"
+        ]
     )
+
+    // Keep each page's meaning when an older or partially edited catalog is loaded.
+    func onboardingLine(at page: Int) -> String {
+        guard Self.fallback.onboarding.indices.contains(page) else { return "" }
+        guard onboarding.indices.contains(page),
+              !onboarding[page].trimmingCharacters(in: .whitespacesAndNewlines).isEmpty else {
+            return Self.fallback.onboarding[page]
+        }
+        return onboarding[page]
+    }
 
     func lines(for context: KarmaContext) -> [String] {
         switch context {

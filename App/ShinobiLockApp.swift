@@ -16,13 +16,40 @@ struct ShinobiLockApp: App {
 
 struct HomeView: View {
     @StateObject private var model = LockModel()
+    @AppStorage("onboarding.completed") private var onboardingCompleted = false
     @Environment(\.scenePhase) private var scenePhase
     @State private var editingRule: LockRule?
     @State private var showingSettings = false
     @State private var unlockTarget: UnlockTarget?
+    @State private var ruleAction: RuleActionRequest?
     @ScaledMetric(relativeTo: .title2) private var countdownWidth: CGFloat = 80
 
     var body: some View {
+        Group {
+            if onboardingCompleted {
+                home
+            } else {
+                OnboardingView(mode: .firstLaunch) {
+                    onboardingCompleted = true
+                }
+            }
+        }
+        .task(id: scenePhase) {
+            guard scenePhase == .active else { return }
+            model.synchronize()
+            presentPendingTarget()
+            while !Task.isCancelled {
+                do { try await Task.sleep(for: .seconds(2)) } catch { return }
+                guard !Task.isCancelled else { return }
+                model.refresh()
+            }
+        }
+        .onChange(of: model.state.pendingUnlockRequest?.id) { _, requestID in
+            if requestID != nil { presentPendingTarget() }
+        }
+    }
+
+    private var home: some View {
         NavigationStack {
             ScrollView {
                 VStack(alignment: .leading, spacing: 16) {
@@ -33,9 +60,6 @@ struct HomeView: View {
                         statusCard
                         if let access = model.state.temporaryAccess, access.isValid() {
                             accessCard(access)
-                        }
-                        if let token = model.state.pendingApplication, model.lockedApplications.contains(token) {
-                            pendingCard(token)
                         }
                     }
                     if model.state.rules.isEmpty {
@@ -53,7 +77,11 @@ struct HomeView: View {
                                      edit: { editingRule = rule }, setEnabled: { value in
                                 var updated = rule
                                 updated.isEnabled = value
-                                model.handle { try model.save(updated) }
+                                if value {
+                                    model.handle { try model.save(updated) }
+                                } else {
+                                    ruleAction = .pause(original: rule, updated: updated)
+                                }
                             })
                         }
                     }
@@ -77,30 +105,24 @@ struct HomeView: View {
             }
             .sheet(item: $editingRule, onDismiss: presentPendingTarget) { RuleEditorView(model: model, rule: $0) }
             .sheet(item: $unlockTarget) { UnlockView(model: model, token: $0.token) }
+            .sheet(item: $ruleAction) { RuleActionView(model: model, request: $0) }
             .sheet(isPresented: $showingSettings, onDismiss: presentPendingTarget) { SettingsView(model: model) }
             .alert("確認してください", isPresented: Binding(get: { model.errorMessage != nil }, set: { if !$0 { model.errorMessage = nil } })) {
                 Button("閉じる", role: .cancel) { model.errorMessage = nil }
             } message: { Text(model.errorMessage ?? "") }
-            .task(id: scenePhase) {
-                guard scenePhase == .active else { return }
-                model.synchronize()
-                presentPendingTarget()
-                while !Task.isCancelled {
-                    do { try await Task.sleep(for: .seconds(2)) } catch { return }
-                    guard !Task.isCancelled else { return }
-                    model.refresh()
-                }
-            }
-            .onChange(of: model.state.pendingApplication) { _, token in
-                if token != nil { presentPendingTarget() }
-            }
+            .onAppear(perform: presentPendingTarget)
         }
     }
 
     private func presentPendingTarget() {
-        guard editingRule == nil, !showingSettings, unlockTarget == nil,
-              let token = model.state.pendingApplication, model.lockedApplications.contains(token) else { return }
-        unlockTarget = UnlockTarget(token: token)
+        guard onboardingCompleted, scenePhase == .active, model.isAuthorized, !model.working,
+              editingRule == nil, !showingSettings, unlockTarget == nil, ruleAction == nil,
+              model.state.pendingUnlockRequest != nil else { return }
+        model.handle {
+            if let token = try model.consumeUnlockRequest() {
+                unlockTarget = UnlockTarget(token: token)
+            }
+        }
     }
 
     private var welcome: some View {
@@ -200,14 +222,6 @@ struct HomeView: View {
             .accessibilityLabel("一時解除の残り時間")
     }
 
-    private func pendingCard(_ token: ApplicationToken) -> some View {
-        VStack(alignment: .leading, spacing: 12) {
-            Label(token).shinobiFont(15, weight: .medium)
-            Text("少しだけ使いますか？").shinobiFont()
-            Button("5分だけ使う") { unlockTarget = UnlockTarget(token: token) }
-                .buttonStyle(ShinobiButtonStyle())
-        }.card(border: ShinobiStyle.accentBorder)
-    }
 }
 
 struct RuleCard: View {

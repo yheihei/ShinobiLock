@@ -3,8 +3,8 @@ import SwiftUI
 struct SettingsView: View {
     @ObservedObject var model: LockModel
     @Environment(\.dismiss) private var dismiss
-    @State private var confirmingPause = false
     @State private var errorMessage: String?
+    @State private var showingOnboarding = false
 
     private var version: String {
         (Bundle.main.object(forInfoDictionaryKey: "CFBundleShortVersionString") as? String ?? "")
@@ -33,6 +33,25 @@ struct SettingsView: View {
                             }
                         }.card(padding: 16)
                     }
+                    ShinobiSection(title: "カルマ") {
+                        Button { showingOnboarding = true } label: {
+                            HStack(spacing: 12) {
+                                Image("karma-onboarding-intro")
+                                    .resizable().scaledToFit().frame(width: 52, height: 52)
+                                    .offset(y: 8).frame(width: 40, height: 40)
+                                    .background(ShinobiStyle.background)
+                                    .clipShape(RoundedRectangle(cornerRadius: 10))
+                                    .accessibilityHidden(true)
+                                Text("案内をもう一度見る").shinobiFont()
+                                    .multilineTextAlignment(.leading)
+                                Spacer(minLength: 0)
+                                Image(systemName: "chevron.right").font(.system(size: 16))
+                                    .foregroundStyle(ShinobiStyle.subdued).accessibilityHidden(true)
+                            }.card(padding: 12)
+                        }
+                        .buttonStyle(.plain)
+                        .accessibilityLabel("カルマの案内をもう一度見る")
+                    }
                     ShinobiSection(title: "データとプライバシー") {
                         VStack(alignment: .leading, spacing: 0) {
                             Label("ルールとアプリの選択情報は、このiPhone内に保存します。", systemImage: "iphone")
@@ -59,13 +78,6 @@ struct SettingsView: View {
                                     .buttonStyle(.plain)
                             }
                         }.card(padding: 0)
-                    }
-                    ShinobiSection(title: "ルール") {
-                        Button(role: .destructive) { confirmingPause = true } label: {
-                            settingsRow("すべてのルールを休止", symbol: "pause", destructive: true)
-                        }
-                        .buttonStyle(.plain).card(padding: 0)
-                        .disabled(model.working || !model.state.rules.contains(where: \.isEnabled))
                     }
                     #if DEBUG
                     NavigationLink {
@@ -94,30 +106,15 @@ struct SettingsView: View {
                     .foregroundStyle(ShinobiStyle.subdued).frame(maxWidth: .infinity)
                     .padding(.vertical, 16).background(ShinobiStyle.background)
             }
-            .disabled(confirmingPause).accessibilityHidden(confirmingPause)
-            .overlay {
-                if confirmingPause {
-                    ShinobiConfirmation(title: "すべてのルールを休止しますか？",
-                                        message: pauseMessage, actionTitle: "休止してロックを解除", stacked: true,
-                                        cancel: { confirmingPause = false }) {
-                        confirmingPause = false
-                        do { try model.pauseAll() }
-                        catch { errorMessage = error.localizedDescription }
-                    }
-                }
-            }
-            .interactiveDismissDisabled(confirmingPause)
             .alert("確認してください", isPresented: Binding(get: { errorMessage != nil }, set: { if !$0 { errorMessage = nil } })) {
                 Button("閉じる", role: .cancel) { errorMessage = nil }
             } message: { Text(errorMessage ?? "") }
+            .fullScreenCover(isPresented: $showingOnboarding) {
+                OnboardingView(mode: .replay) { showingOnboarding = false }
+            }
         }
     }
 
-    private var pauseMessage: String {
-        model.lockedApplications.isEmpty
-            ? "すべてのルールを休止します。ルールは残ります。"
-            : "ロック中の\(model.lockedApplications.count)個のアプリがすぐ使えます。ルールは残ります。"
-    }
     private var separator: some View { Divider().overlay(ShinobiStyle.border).padding(.horizontal, 16) }
     private func settingsRow(_ title: String, symbol: String, destructive: Bool = false) -> some View {
         HStack(spacing: 12) {

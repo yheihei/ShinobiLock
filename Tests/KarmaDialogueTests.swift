@@ -77,4 +77,35 @@ final class KarmaDialogueTests: XCTestCase {
         XCTAssertEqual(unlock.line, "既存の台詞")
         XCTAssertEqual(unlock.stayedLine, "留まる")
     }
+
+    func testOnboardingPreservesPageMeaningWhenCatalogIsMissingOrPartiallyEdited() throws {
+        let oldCatalog = try JSONDecoder().decode(KarmaDialogueCatalog.self, from: Data("{}".utf8))
+        let edited = KarmaDialogueCatalog(unlockBeforeAd: [], stayed: [], onboarding: ["新しい挨拶", " \n"])
+        XCTAssertEqual(edited.onboardingLine(at: 0), "新しい挨拶")
+        for page in 0..<4 {
+            XCTAssertEqual(oldCatalog.onboardingLine(at: page), KarmaDialogueCatalog.fallback.onboarding[page])
+            if page > 0 {
+                XCTAssertEqual(edited.onboardingLine(at: page), KarmaDialogueCatalog.fallback.onboarding[page])
+            }
+        }
+        XCTAssertEqual(edited.onboardingLine(at: -1), "")
+        XCTAssertEqual(edited.onboardingLine(at: 4), "")
+    }
+
+    func testShippingOnboardingHasFourPagesAndSuppliedPortraits() throws {
+        let root = URL(fileURLWithPath: #filePath).deletingLastPathComponent().deletingLastPathComponent()
+        let data = try Data(contentsOf: root.appendingPathComponent("App/Resources/karma-lines.json"))
+        let catalog = try JSONDecoder().decode(KarmaDialogueCatalog.self, from: data)
+        XCTAssertEqual(catalog.onboarding.count, 4)
+        for line in catalog.onboarding {
+            XCTAssertEqual(line.components(separatedBy: "\n").count, 3)
+            XCTAssertFalse(line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
+        }
+        XCTAssertTrue(catalog.onboarding[1].contains("ルール"))
+        XCTAssertTrue(catalog.onboarding[2].contains("5分"))
+        for portrait in ["karma-onboarding-intro", "karma-onboarding-rules", "karma-onboarding-unlock", "karma-onboarding-farewell"] {
+            let path = "App/Assets.xcassets/\(portrait).imageset/\(portrait).png"
+            XCTAssertTrue(FileManager.default.fileExists(atPath: root.appendingPathComponent(path).path))
+        }
+    }
 }
