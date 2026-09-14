@@ -27,5 +27,7 @@
 		<key>NSExtensionPrincipalClass</key>
 		<string>$(PRODUCT_MODULE_NAME).MonitorExtension</string>
 	</dict>
+	<key>CFBundleDisplayName</key>
+	<string>カルマロック</string>
 </dict>
 </plist>

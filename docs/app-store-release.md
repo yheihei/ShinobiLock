@@ -22,7 +22,7 @@
 | リワード広告ユニット | `ca-app-pub-8902711511453943/9569277919` |
 | 広告ユニット名・報酬 | カルマロック_リワード、1 操作の実行 |
 | AdMobアカウント | 審査待ち |
-| Family Controls配布権限 | 申請受付の完了画面を確認。Appleの審査待ち |
+| Family Controls配布権限 | 9月14日20:35のApple承認メールをGmailで確認。本体と3拡張のDistribution権限を有効化・保存 |
 | UMP欧州向けメッセージ | 英語・日本語で公開済み。「同意しない」を表示 |
 
 サポート: https://yheihei.github.io/karma-lock/
@@ -38,11 +38,12 @@ app-ads.txt: https://yheihei.github.io/app-ads.txt
 - 1.0.0（10）のDebugビルドが成功し、接続中のiPhone 12 miniへのインストールと起動に成功。
 - コアテストはXCTest 11件とSwift Testing 14件、計25件が合格。
 - Releaseアーカイブ `build/KarmaLock-1.0.0-10.xcarchive` が成功。本番広告ID、50件のSKAdNetwork ID、本体と3拡張を確認。
-- App Store向け書き出しは失敗。4つの配布プロファイルすべてに `com.apple.developer.family-controls` が含まれていない。ログは `build/app-store-export.log`。
+- 承認前のApp Store向け書き出しは、4つの配布プロファイルにFamily Controls権限がないため失敗（`build/app-store-export.log`）。承認後に本体と3拡張のDistribution権限を有効化し、ビルド11の書き出しが成功した（`build/app-store-export-11.log`）。IPA内の4プロファイルと署名で `com.apple.developer.family-controls=true`、デバッグ不可、App Store配布用であることを検証した。
 - DebugではGoogleの公式テスト広告ユニットを使い、本番広告への自己インプレッションを避けます。本番のAdMob App IDを使うため、UMPはDebugでも動作します。
 - ビルド10の実機で、広告中断ではロック継続、視聴完了で対象アプリだけ解除、本体終了後の5分再ロックについてユーザーが全項目成功と確認。診断ログでも21:15:21の解除開始に対し、21:20:22に終了前の警告通知を確認した（約301秒）。本体を21:26:51に再起動して取得した時点では一時解除状態なし、対象7アプリがロック対象に戻っていた。証跡は `build/release-device-probe-after-reopen.json`。
 - ビルド11では広告の最大コンテンツレーティングを一般向け（G）に制限。Releaseアーカイブ成功。ビルド10からUI・解除処理は変更していない。
 - ビルド11のDebug実機ビルドも成功。21:42にiPhoneへの更新インストール、21:46に起動成功。ログは `build/device-build-11.log`、`build/device-install-11.log`、`build/device-launch-11.log`。
+- ビルド11のアップロードは、3拡張の `CFBundleDisplayName` 不足（90360）でAppleの検証が失敗。各拡張と生成スクリプトに表示名を追加し、ビルド12へ更新した。アプリの動作処理は変更していない。`build/KarmaLock-1.0.0-12.xcarchive` の作成が成功し、本体と3拡張の表示名・ビルド番号を確認した。
 - ルールの休止・削除は9月13日の公式テスト広告による検証記録あり（`docs/rule-action-verification.md`）。実際の通信断・在庫切れは未検証。現行コードでは解除・休止・削除が同じ報酬処理を使い、読み込み失敗・中断時は変更処理を呼ばない。
 
 ## ストア素材と申告の根拠
@@ -69,9 +70,8 @@ Googleのマニフェストには任意機能を含むデバイスIDのトラッ
 
 プライバシー公開後に「審査用に追加」で提出前チェックを実行。「ビルドを選択してください」のみが不足項目として表示されました。審査提出は成立していません。
 
-1. Family Controls承認後、本体とShieldConfiguration、ShieldAction、DeviceActivityMonitorの配布権限を有効化し、配布プロファイルを更新して書き出す。
-2. App Store Connectへアップロードし、ビルド処理と必要項目を確認して審査提出する。
-3. AdMobアカウントの承認を確認する。21:50頃の管理画面でも「アカウントはまだ承認されていません」「確認中」を確認した。App Store公開後にストアURLをAdMobへ紐付け、app-ads.txtとアプリの準備状況の確認を完了する。実広告の配信はまだ確認できていない。
+1. App Store Connectへビルド12をアップロードし、ビルド処理と必要項目を確認して審査提出する。
+2. AdMobアカウントの承認を確認する。22:10頃の管理画面でも「アカウントはまだ承認されていません」「確認中」を確認した。App Store公開後にストアURLをAdMobへ紐付け、app-ads.txtとアプリの準備状況の確認を完了する。実広告の配信はまだ確認できていない。
 
 ## 掲載文
 

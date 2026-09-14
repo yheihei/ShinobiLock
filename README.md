@@ -56,10 +56,9 @@ SDKの`PrivacyInfo.xcprivacy`は各フレームワークに含まれます。
 
 ## 公開前の準備
 
-2026年9月14日に本番のAdMobアプリ・リワード広告ユニットを作成しました。Family Controls配布権限は申請済みで、Appleの審査待ちです。AdMobアカウントもGoogleの審査待ちです。広告による解除を含むApp Store審査は未実施です。
+2026年9月14日に本番のAdMobアプリ・リワード広告ユニットを作成しました。Family Controls配布権限はAppleが承認し、本体と3つのScreen Time拡張で有効化済みです。AdMobアカウントもGoogleの審査待ちです。広告による解除を含むApp Store審査は未実施です。
 
 - AdMobアカウントの承認と、公開後のストア情報の紐付け・アプリ確認
-- 本体と各Screen Time拡張のFamily Controls配布権限の有効化
 - ビルドのアップロードとApp Store審査提出
 
 [サポートページ](https://yheihei.github.io/karma-lock/)と[プライバシーポリシー](https://yheihei.github.io/karma-lock/privacy.html)を公開しています。公開用の元ファイルは`docs/site/`、配信先は`yheihei/yheihei.github.io`です。AdMobの欧州向け同意メッセージは英語・日本語で公開済みです。

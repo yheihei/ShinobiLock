@@ -171,6 +171,8 @@ for name, source, extension_point, principal in specs:
         "CFBundleShortVersionString": "$(MARKETING_VERSION)", "CFBundleVersion": "$(CURRENT_PROJECT_VERSION)",
         "ShinobiAppGroup": "$(SHINOBI_APP_GROUP)",
     }
+    if extension:
+        info["CFBundleDisplayName"] = "カルマロック"
     if report:
         info["EXAppExtensionAttributes"] = {"EXExtensionPointIdentifier": extension_point}
     elif extension:
