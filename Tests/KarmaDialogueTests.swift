@@ -98,10 +98,16 @@ final class KarmaDialogueTests: XCTestCase {
         let catalog = try JSONDecoder().decode(KarmaDialogueCatalog.self, from: data)
         XCTAssertEqual(catalog.onboarding.count, 4)
         for line in catalog.onboarding {
-            XCTAssertEqual(line.components(separatedBy: "\n").count, 3)
+            let displayLines = line.components(separatedBy: "\n")
+            XCTAssertLessThanOrEqual(displayLines.count, 4)
+            for displayLine in displayLines {
+                XCTAssertLessThanOrEqual(displayLine.count, 16)
+            }
             XCTAssertFalse(line.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty)
         }
-        XCTAssertTrue(catalog.onboarding[1].contains("ルール"))
+        for field in ["曜日", "時間", "アプリ"] {
+            XCTAssertTrue(catalog.onboarding[1].contains(field))
+        }
         XCTAssertTrue(catalog.onboarding[2].contains("5分"))
         for portrait in ["karma-onboarding-intro", "karma-onboarding-rules", "karma-onboarding-unlock", "karma-onboarding-farewell"] {
             let path = "App/Assets.xcassets/\(portrait).imageset/\(portrait).png"
