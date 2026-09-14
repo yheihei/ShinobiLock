@@ -2,7 +2,7 @@
 
 カルマロックは、使いすぎを控えたいiPhoneアプリを、指定した曜日と時間帯にロックするアプリです。一時的に使いたいときは、リワード広告を視聴すると対象アプリだけを5分間解除できます。
 
-現在はApp Store公開の準備中です。ReleaseはカルマロックのAdMob広告IDを使用し、DebugはGoogleの公式テスト広告を表示します。
+1.0.0（ビルド12）はApp Store審査待ちです。ReleaseはカルマロックのAdMob広告IDを使用し、DebugはGoogleの公式テスト広告を表示します。
 
 ## 主な機能
 
@@ -56,14 +56,14 @@ SDKの`PrivacyInfo.xcprivacy`は各フレームワークに含まれます。
 
 ## 公開前の準備
 
-2026年9月14日に本番のAdMobアプリ・リワード広告ユニットを作成しました。Family Controls配布権限はAppleが承認し、本体と3つのScreen Time拡張で有効化済みです。AdMobアカウントもGoogleの審査待ちです。広告による解除を含むApp Store審査は未実施です。
+2026年9月14日に本番のAdMobアプリ・リワード広告ユニットを作成しました。Family Controls配布権限はAppleが承認し、本体と3つのScreen Time拡張で有効化済みです。AdMobアカウントもGoogleの審査待ちです。同日22:21に1.0.0（ビルド12）をApp Reviewへ提出し、「審査待ち」を確認しました。初回は日本のみ・無料、承認後に自動公開する設定です。
 
 - AdMobアカウントの承認と、公開後のストア情報の紐付け・アプリ確認
-- ビルドのアップロードとApp Store審査提出
+- App Store審査結果の確認と、指摘がある場合の対応
 
 [サポートページ](https://yheihei.github.io/karma-lock/)と[プライバシーポリシー](https://yheihei.github.io/karma-lock/privacy.html)を公開しています。公開用の元ファイルは`docs/site/`、配信先は`yheihei/yheihei.github.io`です。AdMobの欧州向け同意メッセージは英語・日本語で公開済みです。
 
-App Storeのプライバシー回答も公開済みです。提出前チェックでは、ビルドの選択のみが不足項目として表示されています。
+App Storeのプライバシー回答は公開済みです。Family Controlsを含む配布署名、Appleのビルド検証、アップロードと審査提出が完了しています。
 
 起動時にUMPの同意情報を更新し、広告視聴を選んだときに必要な同意画面を表示します。本番アプリIDを使うDebugビルドでもUMPの処理を通します。Googleの共有テストアプリIDとテスト広告ユニットを同時に使う場合だけ、その確認を省略します。
 
