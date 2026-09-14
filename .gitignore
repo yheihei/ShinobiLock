@@ -1,9 +1,49 @@
+# macOS
 .DS_Store
-.build/
-DerivedData/
+.AppleDouble
+.LSOverride
+._*
+
+# Xcode
 build/
+DerivedData/
 *.xcuserstate
 xcuserdata/
+*.xcscmblueprint
+*.xccheckout
+*.moved-aside
+*.hmap
+*.ipa
+*.dSYM.zip
+*.dSYM
+*.xcresult
+timeline.xctimeline
+playground.xcworkspace
+
+# Swift Package Manager
+.build/
+.swiftpm/
+Package.resolved.lock
+
+# CocoaPods / Carthage
+Pods/
+Carthage/Build/
+
+# fastlane
+fastlane/report.xml
+fastlane/Preview.html
+fastlane/screenshots/**/*.png
+fastlane/test_output
+
+# Local configuration and secrets
 Config/Local.xcconfig
+*.mobileprovision
+*.p12
+*.cer
+
+# Python helpers
 __pycache__/
 *.pyc
+
+# Generated assets, verification captures, and other local work products
+output/
