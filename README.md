@@ -59,11 +59,12 @@ SDKの`PrivacyInfo.xcprivacy`は各フレームワークに含まれます。
 2026年9月14日に本番のAdMobアプリ・リワード広告ユニットを作成しました。Family Controls配布権限は申請済みで、Appleの審査待ちです。AdMobアカウントもGoogleの審査待ちです。広告による解除を含むApp Store審査は未実施です。
 
 - AdMobアカウントの承認と、公開後のストア情報の紐付け・アプリ確認
-- 入力・保存済みのApp Storeプライバシー回答の最終公開
 - 本体と各Screen Time拡張のFamily Controls配布権限の有効化
 - ビルドのアップロードとApp Store審査提出
 
 [サポートページ](https://yheihei.github.io/karma-lock/)と[プライバシーポリシー](https://yheihei.github.io/karma-lock/privacy.html)を公開しています。公開用の元ファイルは`docs/site/`、配信先は`yheihei/yheihei.github.io`です。AdMobの欧州向け同意メッセージは英語・日本語で公開済みです。
+
+App Storeのプライバシー回答も公開済みです。提出前チェックでは、ビルドの選択のみが不足項目として表示されています。
 
 起動時にUMPの同意情報を更新し、広告視聴を選んだときに必要な同意画面を表示します。本番アプリIDを使うDebugビルドでもUMPの処理を通します。Googleの共有テストアプリIDとテスト広告ユニットを同時に使う場合だけ、その確認を省略します。
 
