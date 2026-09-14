@@ -144,7 +144,7 @@ struct UnlockView: View {
     private var actions: some View {
         VStack(alignment: .leading, spacing: 10) {
             if ads.granted {
-                Button("忍びロックのホームへ") { dismiss() }
+                Button("カルマロックのホームへ") { dismiss() }
                     .buttonStyle(ShinobiButtonStyle(kind: .secondary, height: 52))
             } else {
                 if !eligible && !ads.busy {

@@ -52,7 +52,7 @@ final class LockModel: ObservableObject {
             synchronize()
         } catch {
             refresh()
-            authorizationMessage = "iPhoneの設定 › スクリーンタイムで、忍びロックのアクセスを確認してください。"
+            authorizationMessage = "iPhoneの設定 › スクリーンタイムで、カルマロックのアクセスを確認してください。"
         }
     }
 

@@ -94,7 +94,7 @@ struct HomeView: View {
             }
             .shinobiScreen()
             .safeAreaInset(edge: .top, spacing: 0) {
-                ShinobiHeader(title: "忍びロック") { Color.clear.frame(height: 44) } trailing: {
+                ShinobiHeader(title: "カルマロック") { Color.clear.frame(height: 44) } trailing: {
                     Button { showingSettings = true } label: {
                         Image(systemName: "gearshape").font(.system(size: 20))
                             .frame(width: 36, height: 36)

@@ -15,7 +15,7 @@ final class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             backgroundBlurStyle: .systemMaterialDark,
             backgroundColor: background,
             icon: UIImage(systemName: "lock.shield")?.withTintColor(accent, renderingMode: .alwaysOriginal),
-            title: .init(text: "忍びロック", color: text),
+            title: .init(text: "カルマロック", color: text),
             subtitle: .init(text: "\(application.localizedDisplayName ?? "このアプリ")はロックされています。\n大切な時間を、守ろう。", color: text),
             primaryButtonLabel: .init(text: "閉じる", color: text),
             primaryButtonBackgroundColor: button,

@@ -97,10 +97,10 @@ struct KarmaRoomView: View {
     }
 
     private var brand: some View {
-        Text("忍びロック")
+        Text("カルマロック")
             .shinobiFont(12, relativeTo: .caption).tracking(1.7)
             .foregroundStyle(ShinobiStyle.subdued)
-            .accessibilityLabel("忍びロック、カルマの間")
+            .accessibilityLabel("カルマロック、カルマの間")
             .accessibilityAddTraits(.isHeader)
     }
 

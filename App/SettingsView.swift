@@ -102,7 +102,7 @@ struct SettingsView: View {
                 }
             }
             .safeAreaInset(edge: .bottom, spacing: 0) {
-                Text("忍びロック " + version).shinobiFont(12, relativeTo: .caption)
+                Text("カルマロック " + version).shinobiFont(12, relativeTo: .caption)
                     .foregroundStyle(ShinobiStyle.subdued).frame(maxWidth: .infinity)
                     .padding(.vertical, 16).background(ShinobiStyle.background)
             }

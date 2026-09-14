@@ -39,7 +39,7 @@ with tempfile.TemporaryDirectory(prefix="shinobilock-probe-") as temp:
         "--timeout", "20", "--quiet",
     ], env=environment)
     if result.returncode:
-        parser.exit(1, "検証ログを取得できませんでした。接続先とBundle IDを確認し、iPhoneでDebug版の忍びロックを開いてから再実行してください。\n")
+        parser.exit(1, "検証ログを取得できませんでした。接続先とBundle IDを確認し、iPhoneでDebug版のカルマロックを開いてから再実行してください。\n")
     state = json.loads(raw.read_text())
 
 access = state.get("temporaryAccess")

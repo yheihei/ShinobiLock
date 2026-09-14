@@ -21,7 +21,7 @@
 	<key>ShinobiAppGroup</key>
 	<string>$(SHINOBI_APP_GROUP)</string>
 	<key>CFBundleDisplayName</key>
-	<string>忍びロック</string>
+	<string>カルマロック</string>
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>UIAppFonts</key>

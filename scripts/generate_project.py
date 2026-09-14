@@ -177,7 +177,7 @@ for name, source, extension_point, principal in specs:
         info["NSExtension"] = {"NSExtensionPointIdentifier": extension_point,
                                "NSExtensionPrincipalClass": "$(PRODUCT_MODULE_NAME)." + principal}
     else:
-        info.update({"CFBundleDisplayName": "忍びロック", "LSRequiresIPhoneOS": True,
+        info.update({"CFBundleDisplayName": "カルマロック", "LSRequiresIPhoneOS": True,
                      "UIAppFonts": [Path(path).name for path in font_files if path.endswith(".ttf")],
                      "GADApplicationIdentifier": "$(SHINOBI_ADMOB_APP_ID)",
                      "ShinobiRewardedAdUnitID": "$(SHINOBI_REWARDED_AD_UNIT_ID)",
