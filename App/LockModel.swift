@@ -61,13 +61,33 @@ final class LockModel: ObservableObject {
         try mutate { try ProbeControl.saveRule(rule) }
     }
 
-    func delete(_ id: UUID) throws { try mutate { try ProbeControl.deleteRule(id) } }
-    func pauseAll() throws { try mutate { try ProbeControl.clear() } }
+    func canPerform(_ request: RuleActionRequest) -> Bool {
+        state.rules.first(where: { $0.id == request.original.id }) == request.original
+    }
+
+    // Called only by the reward callback. Storage checks the original revision again
+    // inside its transaction so a stale ad cannot overwrite a subsequent edit.
+    func performRewardedAction(_ request: RuleActionRequest) throws {
+        try mutate {
+            if let updated = request.updated {
+                try ProbeControl.saveRule(updated, authorizingPauseOf: request.original)
+            } else {
+                try ProbeControl.deleteRule(request.original)
+            }
+        }
+    }
 
     func unlock(_ token: ApplicationToken) throws {
         authorization = AuthorizationCenter.shared.authorizationStatus
         guard isAuthorized else { throw AppError.permissionRequired }
         try mutate { try ProbeControl.unlockForFiveMinutes(token) }
+    }
+
+    func consumeUnlockRequest() throws -> ApplicationToken? {
+        guard isAuthorized else { return nil }
+        var token: ApplicationToken?
+        try mutate { token = try ProbeControl.consumeUnlockRequest() }
+        return token
     }
 
     func handle(_ operation: () throws -> Void) {

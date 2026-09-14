@@ -12,7 +12,7 @@ final class ShieldActionExtension: ShieldActionDelegate {
         case .secondaryButtonPressed:
             do {
                 try ProbeStorage.transaction { state in
-                    state.pendingApplication = application
+                    state.pendingUnlockRequest = UnlockRequest(token: application)
                     state.record("Shieldから本体へ移動", application: application)
                 }
                 completionHandler(.openParentalControlsApp)

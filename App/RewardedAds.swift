@@ -46,6 +46,15 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
     @Published private(set) var failed = false
     private var ad: RewardedAd?
     private var gate = RewardGate()
+    private let ineligibleMessage: String
+    private let incompleteMessage: String
+
+    init(ineligibleMessage: String = AdError.noLongerLocked.localizedDescription,
+         incompleteMessage: String = "広告の視聴が完了していないため、ロックを続けています。") {
+        self.ineligibleMessage = ineligibleMessage
+        self.incompleteMessage = incompleteMessage
+        super.init()
+    }
 
     func show(eligible: @escaping () -> Bool, reward: @escaping () throws -> Void) async {
         guard !busy else { return }
@@ -75,10 +84,11 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
             loaded.present(from: nil) { [weak self] in
                 guard let self, self.gate.claim(attempt) else { return }
                 do {
+                    guard eligible() else { throw AdError.noLongerLocked }
                     try reward()
                     self.granted = true
                 } catch {
-                    self.message = error.localizedDescription
+                    self.message = (error as? AdError) == .noLongerLocked ? self.ineligibleMessage : error.localizedDescription
                     self.failed = true
                 }
             }
@@ -86,7 +96,8 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
             finish()
             if !(error is CancellationError) {
                 failed = true
-                message = (error as? AdError)?.localizedDescription ?? AdError.unavailable.localizedDescription
+                message = (error as? AdError) == .noLongerLocked ? ineligibleMessage
+                    : (error as? AdError)?.localizedDescription ?? AdError.unavailable.localizedDescription
                 #if DEBUG
                 print("Rewarded ad failed: \(error.localizedDescription)")
                 #endif
@@ -95,7 +106,7 @@ final class RewardedAds: NSObject, ObservableObject, FullScreenContentDelegate {
     }
 
     func adDidDismissFullScreenContent(_ ad: FullScreenPresentingAd) {
-        if !granted && message == nil { message = "広告の視聴が完了していないため、ロックを続けています。" }
+        if !granted && message == nil { message = incompleteMessage }
         finish()
     }
 

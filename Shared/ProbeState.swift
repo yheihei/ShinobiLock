@@ -12,15 +12,19 @@ enum ProbeError: LocalizedError {
     case invalidName
     case tooManyApplications
     case tooManyOverlappingApplications
+    case ruleChanged
+    case pauseRequiresReward
 
     var errorDescription: String? {
         switch self {
         case .appGroupMissing: return "共有領域を開けません。App Groupsと署名設定を確認してください。"
         case .noApplication: return "対象アプリを確認してください。設定には1つ以上のアプリが必要で、一時解除はロック時間中だけ利用できます。"
-        case .alreadyUnlocked: return "ほかのアプリを一時解除中です。終了後にもう一度お試しください。"
+        case .alreadyUnlocked: return "ほかのアプリを一時解除中のため、解除できません。"
         case .invalidName: return "ルール名は1〜30文字で入力してください。"
         case .tooManyApplications: return "1つのルールで選べるアプリは\(LockRule.maximumApplications)個までです。対象アプリを減らしてください。"
         case .tooManyOverlappingApplications: return "ほかのルールと合わせて、同じ時間にロックするアプリが\(LockRule.maximumApplications)個を超えます。対象アプリを減らすか、曜日・時間をずらしてください。"
+        case .ruleChanged: return "ルールが変更されています。画面を閉じて、内容を確認してください。"
+        case .pauseRequiresReward: return "ルールを休止するには、広告の視聴を完了してください。"
         }
     }
 }
@@ -69,17 +73,30 @@ struct ProbeEvent: Codable, Identifiable {
     var note: String?
 }
 
+struct UnlockRequest: Codable, Identifiable, Equatable {
+    var id = UUID()
+    let token: ApplicationToken
+    var requestedAt = Date()
+
+    // This is only the Shield-to-app handoff, not the five-minute access window.
+    // An unhandled request must not become an invitation on a later app launch.
+    func isRecent(at date: Date) -> Bool {
+        let age = date.timeIntervalSince(requestedAt)
+        return age >= 0 && age < 60
+    }
+}
+
 struct ProbeState: Codable {
     var rules: [LockRule] = []
     var lockedApplications: Set<ApplicationToken> = []
-    var pendingApplication: ApplicationToken?
+    var pendingUnlockRequest: UnlockRequest?
     var temporaryAccess: TemporaryAccess?
     var events: [ProbeEvent] = []
 
     init() {}
 
     private enum CodingKeys: String, CodingKey {
-        case rules, lockedApplications, pendingApplication, temporaryAccess, events
+        case rules, lockedApplications, pendingUnlockRequest, temporaryAccess, events
     }
 
     init(from decoder: Decoder) throws {
@@ -87,7 +104,8 @@ struct ProbeState: Codable {
         // The first physical prototype predates weekly rules.
         rules = try values.decodeIfPresent([LockRule].self, forKey: .rules) ?? []
         lockedApplications = try values.decodeIfPresent(Set<ApplicationToken>.self, forKey: .lockedApplications) ?? []
-        pendingApplication = try values.decodeIfPresent(ApplicationToken.self, forKey: .pendingApplication)
+        // Ignore the old pendingApplication key: it may be an already-cancelled request.
+        pendingUnlockRequest = try values.decodeIfPresent(UnlockRequest.self, forKey: .pendingUnlockRequest)
         temporaryAccess = try values.decodeIfPresent(TemporaryAccess.self, forKey: .temporaryAccess)
         events = try values.decodeIfPresent([ProbeEvent].self, forKey: .events) ?? []
     }
@@ -178,8 +196,22 @@ enum ProbeControl {
             state.temporaryAccess = nil
             state.record("一時解除を終了", application: access.token)
         }
-        if let target = state.pendingApplication, !state.lockedApplications.contains(target) {
-            state.pendingApplication = nil
+        if let request = state.pendingUnlockRequest,
+           !request.isRecent(at: .now) || !state.lockedApplications.contains(request.token) {
+            state.pendingUnlockRequest = nil
+        }
+    }
+
+    // Persist consumption before presenting any UI. Cancellation, app termination,
+    // and subsequent foreground refreshes can never replay the same request.
+    static func consumeUnlockRequest(at date: Date = .now) throws -> ApplicationToken? {
+        try ProbeStorage.transaction { state in
+            let request = state.pendingUnlockRequest
+            state.pendingUnlockRequest = nil
+            guard let request, request.isRecent(at: date),
+                  state.applicationsRestrictedByRules(at: date).contains(request.token),
+                  state.temporaryAccess?.isValid(now: date) != true else { return nil }
+            return request.token
         }
     }
 
@@ -209,7 +241,7 @@ enum ProbeControl {
         )
     }
 
-    static func saveRule(_ proposed: LockRule) throws {
+    static func saveRule(_ proposed: LockRule, authorizingPauseOf expected: LockRule? = nil) throws {
         var rule = proposed
         rule.name = rule.name.trimmingCharacters(in: .whitespacesAndNewlines)
         rule.updatedAt = .now
@@ -222,6 +254,13 @@ enum ProbeControl {
         if rule.isEnabled { try center.startMonitoring(activity, during: deviceSchedule(for: rule)) }
         do {
             try ProbeStorage.transaction(updateShield: true) { state in
+                let current = state.rules.first { $0.id == rule.id }
+                if let expected {
+                    guard current == expected, expected.isEnabled, !rule.isEnabled else { throw ProbeError.ruleChanged }
+                } else if current?.isEnabled == true && !rule.isEnabled {
+                    // Ordinary edits remain ad-free; only changing enabled to paused needs a reward.
+                    throw ProbeError.pauseRequiresReward
+                }
                 if let index = state.rules.firstIndex(where: { $0.id == rule.id }) {
                     state.rules[index] = rule
                 } else {
@@ -240,14 +279,16 @@ enum ProbeControl {
         stopExpiredPauseMonitoring()
     }
 
-    static func deleteRule(_ id: UUID) throws {
+    static func deleteRule(_ expected: LockRule) throws {
         let previous = try ProbeStorage.transaction(updateShield: true) { state in
-            let previous = state.rules.first { $0.id == id }
-            state.rules.removeAll { $0.id == id }
-            state.record("ルールを削除", note: id.uuidString)
+            guard let previous = state.rules.first(where: { $0.id == expected.id }), previous == expected else {
+                throw ProbeError.ruleChanged
+            }
+            state.rules.removeAll { $0.id == expected.id }
+            state.record("ルールを削除", note: expected.id.uuidString)
             return previous
         }
-        if let previous { center.stopMonitoring([DeviceActivityName(previous.monitoringID)]) }
+        center.stopMonitoring([DeviceActivityName(previous.monitoringID)])
         stopExpiredPauseMonitoring()
     }
 
@@ -273,26 +314,6 @@ enum ProbeControl {
             $0.rawValue.hasPrefix(activityPrefix) && $0.rawValue != state.temporaryAccess?.monitoringID
         }
         if !obsolete.isEmpty { center.stopMonitoring(obsolete) }
-    }
-
-    static func clear() throws {
-        // The emergency release must work even when the shared data cannot be read.
-        store.clearAllSettings()
-        stopProbeMonitoring()
-        let rules = center.activities.filter { $0.rawValue.hasPrefix(rulePrefix) }
-        if !rules.isEmpty { center.stopMonitoring(rules) }
-        try ProbeStorage.transaction(updateShield: true) { state in
-            for index in state.rules.indices { state.rules[index].isEnabled = false }
-            state.lockedApplications = []
-            state.temporaryAccess = nil
-            state.pendingApplication = nil
-            state.record("すべてのルールを休止")
-        }
-    }
-
-    static func stopProbeMonitoring() {
-        let activities = center.activities.filter { $0.rawValue.hasPrefix(activityPrefix) }
-        if !activities.isEmpty { center.stopMonitoring(activities) }
     }
 
     static func unlockForFiveMinutes(_ token: ApplicationToken) throws {
@@ -321,7 +342,7 @@ enum ProbeControl {
                 guard state.applicationsRestrictedByRules().contains(token) else { throw ProbeError.noApplication }
                 guard state.temporaryAccess?.isValid() != true else { throw ProbeError.alreadyUnlocked }
                 state.temporaryAccess = access
-                state.pendingApplication = nil
+                state.pendingUnlockRequest = nil
                 state.record("5分解除を開始", application: token, note: activity.rawValue)
             }
         } catch {

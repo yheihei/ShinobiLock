@@ -19,7 +19,7 @@ final class ShieldConfigurationExtension: ShieldConfigurationDataSource {
             subtitle: .init(text: "\(application.localizedDisplayName ?? "このアプリ")はロックされています。\n大切な時間を、守ろう。", color: text),
             primaryButtonLabel: .init(text: "閉じる", color: text),
             primaryButtonBackgroundColor: button,
-            secondaryButtonLabel: .init(text: "広告を見て5分使う", color: accent)
+            secondaryButtonLabel: .init(text: "広告を見て5分間解除", color: accent)
         )
     }
 }

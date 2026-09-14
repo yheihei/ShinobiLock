@@ -43,6 +43,7 @@ with tempfile.TemporaryDirectory(prefix="shinobilock-probe-") as temp:
     state = json.loads(raw.read_text())
 
 access = state.get("temporaryAccess")
+pending = state.get("pendingUnlockRequest")
 report = {
     "rules": [{
         "id": rule["id"], "name": rule["name"],
@@ -50,7 +51,12 @@ report = {
         "applications": [token_id(token) for token in rule.get("applications", [])],
     } for rule in state.get("rules", [])],
     "lockedApplications": [token_id(token) for token in state.get("lockedApplications", [])],
-    "pendingApplication": token_id(state.get("pendingApplication")),
+    "pendingApplication": token_id(pending["token"] if pending else state.get("pendingApplication")),
+    "pendingUnlockRequest": None if not pending else {
+        "id": pending["id"],
+        "application": token_id(pending["token"]),
+        "requestedAt": timestamp(pending["requestedAt"]),
+    },
     "temporaryAccess": None if not access else {
         "application": token_id(access["token"]),
         "startedAt": timestamp(access["window"]["startedAt"]),

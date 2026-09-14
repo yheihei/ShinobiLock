@@ -40,17 +40,13 @@ struct UnlockView: View {
                 introduction
                 if ads.granted {
                     grantedCard
-                    if activeAccess != nil {
-                        Label("ホーム画面から対象アプリを開いてください。", systemImage: "arrow.up.forward.square")
-                            .shinobiFont().foregroundStyle(ShinobiStyle.secondary)
-                    }
                 } else {
                     VStack(alignment: .leading, spacing: 6) {
                         Text("解除するアプリ").shinobiFont(12, relativeTo: .caption).foregroundStyle(ShinobiStyle.muted)
                         Label(token).shinobiFont(17, weight: .medium)
                     }.card(padding: 16)
                     VStack(alignment: .leading, spacing: 14) {
-                        condition("広告を最後まで見ると、このアプリだけ5分間使えます。", symbol: "checkmark", accented: true)
+                        condition("広告の視聴を完了すると、このアプリのロックを5分間解除します。", symbol: "checkmark", accented: true)
                         condition("途中で閉じると解除されません。", symbol: "xmark", accented: false)
                     }.padding(.vertical, 4)
                 }
@@ -60,7 +56,7 @@ struct UnlockView: View {
         }
         .shinobiScreen()
         .safeAreaInset(edge: .top, spacing: 0) {
-            ShinobiHeader(title: "5分だけ使う") {
+            ShinobiHeader(title: "一時解除") {
                 if !ads.granted {
                     Button("閉じる") { loadingTask?.cancel(); dismiss() }
                         .foregroundStyle(ShinobiStyle.secondary).frame(minHeight: 44).disabled(ads.presenting)
@@ -80,6 +76,17 @@ struct UnlockView: View {
         }
     }
 
+    private var introductionTitle: String {
+        if ads.granted {
+            return activeAccess == nil ? "一時解除が終了しました。" : "一時解除中です。"
+        }
+        if !model.isAuthorized { return "スクリーンタイムの\n許可が必要です。" }
+        if !model.state.applicationsRestrictedByRules().contains(token) {
+            return "このアプリのロック時間は\n終了しました。"
+        }
+        return "このアプリは\nロック中です。"
+    }
+
     private var introduction: some View {
         VStack(alignment: .leading, spacing: 14) {
             Image(systemName: ads.granted ? "lock.open" : "hourglass")
@@ -90,7 +97,7 @@ struct UnlockView: View {
                     .strokeBorder(ads.granted ? ShinobiStyle.accentBorder : ShinobiStyle.border))
                 .shadow(color: ads.granted ? ShinobiStyle.accent.opacity(0.22) : .clear, radius: 12)
                 .accessibilityHidden(true)
-            Text(ads.granted ? (activeAccess == nil ? "一時解除が終了しました。" : "5分間、使えます。") : "ひと息ついて、\n5分だけ。")
+            Text(introductionTitle)
                 .shinobiFont(29, weight: .medium, relativeTo: .title).fixedSize(horizontal: false, vertical: true)
         }
     }
@@ -144,14 +151,14 @@ struct UnlockView: View {
                     if !model.isAuthorized {
                         ShinobiMessage(text: "スクリーンタイムの許可を確認してください。")
                     } else if let access = model.state.temporaryAccess, access.isValid() {
-                        ShinobiMessage(text: "一時解除が終わってから、もう一度お試しください。")
+                        ShinobiMessage(text: "一時解除中のため、追加の解除はできません。")
                         HStack {
                             Text("一時解除の残り時間").shinobiFont(13, relativeTo: .footnote)
                             Text(timerInterval: Date.now...max(.now, access.deadline), countsDown: true)
                                 .monospacedDigit().frame(width: 60)
                         }.foregroundStyle(ShinobiStyle.muted)
                     } else {
-                        ShinobiMessage(text: "このアプリのロック時間は終了しました。そのまま使えます。")
+                        ShinobiMessage(text: "このアプリのロック時間は終了しました。")
                     }
                 } else if let message = ads.message {
                     ShinobiMessage(text: message, isError: ads.failed)
@@ -163,7 +170,7 @@ struct UnlockView: View {
                     HStack(spacing: 8) {
                         if ads.busy { ProgressView() }
                         else { Image(systemName: ads.failed ? "arrow.clockwise" : "play.circle") }
-                        Text(ads.busy ? "広告を準備しています" : ads.failed ? "もう一度試す" : "広告を見て5分使う")
+                        Text(ads.busy ? "広告を準備しています" : ads.failed ? "広告を再読み込み" : "広告を見て5分間解除")
                     }
                 }.buttonStyle(ShinobiButtonStyle(height: 52)).disabled(ads.busy || !eligible)
             }

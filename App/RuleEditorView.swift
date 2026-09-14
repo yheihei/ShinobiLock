@@ -9,7 +9,8 @@ struct RuleEditorView: View {
     @State private var selection: FamilyActivitySelection
     @State private var showingPicker = false
     @State private var hasClosedPicker = false
-    @State private var confirmingDelete = false
+    @State private var ruleAction: RuleActionRequest?
+    @State private var completedRuleAction = false
     @State private var attemptedSave = false
     @State private var errorMessage: String?
     @State private var editingTime: TimeField?
@@ -80,7 +81,8 @@ struct RuleEditorView: View {
                         if !isNew {
                             Button(role: .destructive) {
                                 nameFocused = false
-                                confirmingDelete = true
+                                guard let original = model.state.rules.first(where: { $0.id == draft.id }) else { return }
+                                ruleAction = .delete(original: original)
                             } label: { Label("このルールを削除", systemImage: "trash") }
                                 .buttonStyle(ShinobiButtonStyle(kind: .destructive)).padding(.top, 8)
                         }
@@ -110,18 +112,11 @@ struct RuleEditorView: View {
                     if focused { withAnimation { scroll.scrollTo(Field.name, anchor: .top) } }
                 }
             }
-            .disabled(confirmingDelete).accessibilityHidden(confirmingDelete)
-            .overlay {
-                if confirmingDelete {
-                    ShinobiConfirmation(title: "「\(draft.name)」を削除しますか？", message: "元に戻せません。",
-                                        actionTitle: "削除する", cancel: { confirmingDelete = false }) {
-                        confirmingDelete = false
-                        do { try model.delete(draft.id); dismiss() }
-                        catch { errorMessage = error.localizedDescription }
-                    }
-                }
+            .sheet(item: $ruleAction, onDismiss: {
+                if completedRuleAction { dismiss() }
+            }) { request in
+                RuleActionView(model: model, request: request) { completedRuleAction = true }
             }
-            .interactiveDismissDisabled(confirmingDelete)
             .familyActivityPicker(
                 headerText: "ロックするアプリを選んでください。カテゴリを選ぶと、中のアプリをまとめて選べます。",
                 footerText: "Webサイトは対象外です。アプリを1〜\(LockRule.maximumApplications)個選んでください。後から入れたアプリは選び直して追加してください。",
@@ -294,6 +289,13 @@ struct RuleEditorView: View {
     private func save() {
         do {
             draft.applications = selection.applicationTokens
+            if let original = model.state.rules.first(where: { $0.id == draft.id }),
+               original.isEnabled && !draft.isEnabled {
+                try draft.validate()
+                nameFocused = false
+                ruleAction = .pause(original: original, updated: draft)
+                return
+            }
             try model.save(draft)
             dismiss()
         } catch { errorMessage = error.localizedDescription }
