@@ -24,7 +24,7 @@ enum ProbeError: LocalizedError {
         case .tooManyApplications: return "1つのルールで選べるアプリは\(LockRule.maximumApplications)個までです。対象アプリを減らしてください。"
         case .tooManyOverlappingApplications: return "ほかのルールと合わせて、同じ時間にロックするアプリが\(LockRule.maximumApplications)個を超えます。対象アプリを減らすか、曜日・時間をずらしてください。"
         case .ruleChanged: return "ルールが変更されています。画面を閉じて、内容を確認してください。"
-        case .pauseRequiresReward: return "ルールを休止するには、広告の視聴を完了してください。"
+        case .pauseRequiresReward: return "ルールを休止するには、休止の確認画面から操作してください。"
         }
     }
 }
@@ -258,7 +258,7 @@ enum ProbeControl {
                 if let expected {
                     guard current == expected, expected.isEnabled, !rule.isEnabled else { throw ProbeError.ruleChanged }
                 } else if current?.isEnabled == true && !rule.isEnabled {
-                    // Ordinary edits remain ad-free; only changing enabled to paused needs a reward.
+                    // Ordinary edits remain ad-free; pausing requires the confirmed action flow.
                     throw ProbeError.pauseRequiresReward
                 }
                 if let index = state.rules.firstIndex(where: { $0.id == rule.id }) {

@@ -65,7 +65,7 @@ final class LockModel: ObservableObject {
         state.rules.first(where: { $0.id == request.original.id }) == request.original
     }
 
-    // Called only by the reward callback. Storage checks the original revision again
+    // Called after an ad reward or a confirmed fallback wait. Storage checks the original revision again
     // inside its transaction so a stale ad cannot overwrite a subsequent edit.
     func performRewardedAction(_ request: RuleActionRequest) throws {
         try mutate {

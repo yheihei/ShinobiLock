@@ -170,6 +170,7 @@ struct KarmaRoomView: View {
         case .unlock: return "それでも広告を見て5分間解除する"
         case .pauseRule: return "それでも広告を見て休止する"
         case .deleteRule: return "それでも広告を見て削除する"
+        case .adUnavailable: return "やめておく"
         }
     }
 }

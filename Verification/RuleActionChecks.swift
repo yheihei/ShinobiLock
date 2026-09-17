@@ -96,6 +96,7 @@ struct RuleActionChecks {
         if gate.claim(cancelled) { try ProbeControl.saveRule(paused, authorizingPauseOf: first) }
         require(try snapshot().rules == [first, second], "cancelled or failed ad cannot pause")
         let earned = gate.begin()
+        require(gate.present(earned), "ad enters presenting state before reward")
         if gate.claim(earned) { try ProbeControl.saveRule(paused, authorizingPauseOf: first) }
         let afterPause = try snapshot()
         require(afterPause.rules[0].isEnabled == false && afterPause.rules[1] == second, "reward pauses only selected rule")
@@ -137,6 +138,34 @@ struct RuleActionChecks {
         require(access.isValid() && access.token == otherToken, "five-minute reward still grants selected app access")
         require(abs(access.deadline.timeIntervalSince(access.window.startedAt) - 300) < 0.01, "five-minute deadline remains unchanged")
         require(ProbeControl.store.shield.applications == nil, "temporary grant removes selected shield")
+        // The new fallback authorizes the same on-disk operations after ten seconds.
+        try ProbeStorage.transaction(updateShield: true) { $0.rules = [first, second]; $0.temporaryAccess = nil }
+        let wait = gate.begin()
+        require(gate.offerFallback(wait, at: 100), "load failure starts fallback")
+        if gate.claimFallback(at: 109) { try ProbeControl.unlockForFiveMinutes(token) }
+        require(try snapshot().temporaryAccess == nil, "fallback cannot unlock before ten seconds")
+        if gate.claimFallback(at: 110) { try ProbeControl.unlockForFiveMinutes(token) }
+        require(try snapshot().temporaryAccess?.token == token && ProbeControl.store.shield.applications == [otherToken],
+                "fallback unlock affects only requested app")
+        let fallbackAccess = try snapshot().temporaryAccess!
+        require(abs(fallbackAccess.deadline.timeIntervalSince(fallbackAccess.window.startedAt) - 300) < 0.01,
+                "fallback uses the same five-minute deadline")
+        try ProbeStorage.transaction(updateShield: true) { $0.temporaryAccess = nil }
+        let pauseWait = gate.begin()
+        require(gate.offerFallback(pauseWait, at: 200), "pause fallback starts")
+        if gate.claimFallback(at: 210) { try ProbeControl.saveRule(paused, authorizingPauseOf: first) }
+        let afterFallbackPause = try snapshot()
+        let persistedPause = afterFallbackPause.rules[0]
+        require(!persistedPause.isEnabled && persistedPause.id == first.id && afterFallbackPause.rules[1] == second, "fallback pause preserves other rules")
+        let deleteWait = gate.begin()
+        require(gate.offerFallback(deleteWait, at: 300), "delete fallback starts")
+        gate.finish()
+        if gate.claimFallback(at: 310) { try ProbeControl.deleteRule(persistedPause) }
+        require(try snapshot().rules == [persistedPause, second], "cancelled fallback keeps the rule")
+        let confirmedDelete = gate.begin()
+        require(gate.offerFallback(confirmedDelete, at: 400), "new delete fallback starts")
+        if gate.claimFallback(at: 410) { try ProbeControl.deleteRule(persistedPause) }
+        require(try snapshot().rules == [second], "fallback delete affects only selected rule")
         require(before > 0, "state serialization works")
         print("\(checks) rule-action and unlock-intent checks passed. DeviceActivity and ManagedSettings are test doubles; persistence and control code are real.")
     }

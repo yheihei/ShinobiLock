@@ -170,7 +170,9 @@ struct OnboardingView: View {
             condition(symbol: "checkmark", color: ShinobiStyle.accentText,
                       text: Text("広告を最後まで見ると、そのアプリだけ \(Text("5分間").foregroundStyle(ShinobiStyle.accentBright)) 使えます。"))
             condition(symbol: "xmark", color: ShinobiStyle.muted,
-                      text: Text("途中で閉じると解除されません。"))
+                      text: Text("広告を途中で閉じると解除されません。"))
+            condition(symbol: "hourglass", color: ShinobiStyle.muted,
+                      text: Text("広告を表示できない場合は、10秒待ってから解除するか選べます。"))
             condition(symbol: "eye", color: ShinobiStyle.danger,
                       text: Text("解除の前に、カルマがひとこと。"))
         }.padding(.horizontal, 2).padding(.vertical, 4)

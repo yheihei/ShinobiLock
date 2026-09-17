@@ -29,6 +29,7 @@ struct RuleActionView: View {
     let request: RuleActionRequest
     var onCompleted: () -> Void = {}
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @StateObject private var ads = RewardedAds(
         ineligibleMessage: "ルールが変更されています。画面を閉じて、内容を確認してください。",
         incompleteMessage: "広告の視聴が完了していないため、ルールは変更していません。"
@@ -42,7 +43,17 @@ struct RuleActionView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if let encounter {
+                if let fallback = ads.fallbackEncounter {
+                    AdUnavailableView(encounter: fallback, secondsRemaining: ads.fallbackSecondsRemaining,
+                                      actionTitle: "このルールを\(request.verb)する",
+                                      detail: request.isPause ? "10秒待ってから、休止するか選べます。" : "10秒待ってから、削除するか選べます。削除は元に戻せません。",
+                                      eligible: eligible,
+                                      confirm: {
+                                          model.refresh()
+                                          ads.confirmFallback(eligible: { eligible }, perform: { try model.performRewardedAction(request) })
+                                      }, cancel: cancelAndDismiss)
+                        .id(fallback.id)
+                } else if let encounter {
                     KarmaRoomView(encounter: encounter, context: request.context,
                                   continueToAd: showAd, stayLocked: { dismiss() })
                         .id(encounter.id)
@@ -51,8 +62,13 @@ struct RuleActionView: View {
                 }
             }
         }
-        .interactiveDismissDisabled(ads.presenting || encounter != nil)
-        .onDisappear { if !ads.presenting { loadingTask?.cancel() } }
+        .interactiveDismissDisabled(ads.presenting || encounter != nil || ads.fallbackEncounter != nil)
+        .onDisappear {
+            if !ads.presenting { loadingTask?.cancel(); ads.cancel() }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active && !ads.presenting && ads.busy { cancelAndDismiss() }
+        }
         .onChange(of: ads.busy) { _, busy in
             // Let the ad dismiss before closing its presenting sheet or the editor.
             guard !busy, ads.granted, !completed else { return }
@@ -80,7 +96,7 @@ struct RuleActionView: View {
                      : "このルールを削除します。元に戻せません。")
                     .shinobiFont().foregroundStyle(ShinobiStyle.secondary)
                     .fixedSize(horizontal: false, vertical: true)
-                Text("広告の視聴を完了すると\(request.verb)します。途中でやめた場合、ルールは変更しません。")
+                Text("広告の視聴を完了すると\(request.verb)します。広告を表示できない場合は、10秒待ってから実行するか選べます。途中でやめた場合、ルールは変更しません。")
                     .shinobiFont(14).foregroundStyle(ShinobiStyle.muted)
                     .fixedSize(horizontal: false, vertical: true)
                 if request.hasOtherEdits {
@@ -98,7 +114,7 @@ struct RuleActionView: View {
         .shinobiScreen()
         .safeAreaInset(edge: .top, spacing: 0) {
             ShinobiHeader(title: "ルールの\(request.verb)") {
-                Button("閉じる") { loadingTask?.cancel(); dismiss() }
+                Button("閉じる") { cancelAndDismiss() }
                     .foregroundStyle(ShinobiStyle.secondary).frame(minHeight: 44).disabled(ads.presenting)
             } trailing: { Color.clear.frame(height: 44) }
         }
@@ -113,11 +129,17 @@ struct RuleActionView: View {
                         Text(ads.busy ? "広告を準備しています" : "広告を見て\(request.verb)する")
                     }
                 }.buttonStyle(ShinobiButtonStyle(height: 52)).disabled(ads.busy || !eligible)
-                Button("やめておく") { loadingTask?.cancel(); dismiss() }
+                Button("やめておく") { cancelAndDismiss() }
                     .buttonStyle(ShinobiButtonStyle(kind: .secondary, height: 52)).disabled(ads.presenting)
             }.padding(.horizontal, 20).padding(.top, 12).padding(.bottom, 16)
                 .background(ShinobiStyle.background)
         }
+    }
+
+    private func cancelAndDismiss() {
+        loadingTask?.cancel()
+        ads.cancel()
+        dismiss()
     }
 
     private func showAd() {

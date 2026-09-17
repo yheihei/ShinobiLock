@@ -18,6 +18,26 @@ final class KarmaDialogueTests: XCTestCase {
         }
     }
 
+    func testAdFailureUsesSadPortraitsAndNonrepeatingLines() {
+        let catalog = KarmaDialogueCatalog(unlockBeforeAd: [], stayed: [], adUnavailable: ["一", "二", "三"])
+        var random = SystemRandomNumberGenerator()
+        var previousLine: String?
+        var previousPortrait: KarmaPortrait?
+        for _ in 0..<30 {
+            let next = catalog.encounter(context: .adUnavailable, previousLine: previousLine,
+                                         previousPortrait: previousPortrait, using: &random)
+            XCTAssertNotEqual(next.line, previousLine)
+            XCTAssertNotEqual(next.portrait, previousPortrait)
+            XCTAssertTrue([KarmaPortrait.sadBust, .disappointedFront, .sadLookaway].contains(next.portrait))
+            previousLine = next.line
+            previousPortrait = next.portrait
+        }
+        let fallback = KarmaDialogueCatalog.fallback.encounter(context: .adUnavailable,
+                                                               previousLine: nil, previousPortrait: nil, using: &random)
+        XCTAssertFalse(fallback.line.isEmpty)
+        XCTAssertEqual(fallback.portrait == .coolSmirk, false)
+    }
+
     func testSingleLineAndDuplicateLinesRemainUsable() {
         let catalog = KarmaDialogueCatalog(unlockBeforeAd: ["一", "一"], stayed: ["留まる"])
         var random = SystemRandomNumberGenerator()
@@ -40,6 +60,8 @@ final class KarmaDialogueTests: XCTestCase {
         let catalog = try JSONDecoder().decode(KarmaDialogueCatalog.self, from: data)
         XCTAssertGreaterThan(catalog.unlockBeforeAd.count, 1)
         XCTAssertEqual(Set(catalog.unlockBeforeAd).count, catalog.unlockBeforeAd.count)
+        XCTAssertEqual(catalog.adUnavailable.count, 10)
+        XCTAssertEqual(Set(catalog.adUnavailable).count, 10)
         XCTAssertFalse(catalog.stayed.isEmpty)
         XCTAssertGreaterThan(catalog.pauseBeforeAd.count, 1)
         XCTAssertGreaterThan(catalog.deleteBeforeAd.count, 1)

@@ -7,6 +7,7 @@ struct UnlockView: View {
     let token: ApplicationToken
     @StateObject private var ads = RewardedAds()
     @Environment(\.dismiss) private var dismiss
+    @Environment(\.scenePhase) private var scenePhase
     @State private var loadingTask: Task<Void, Never>?
     @State private var karmaEncounter: KarmaEncounter?
 
@@ -22,7 +23,17 @@ struct UnlockView: View {
     var body: some View {
         NavigationStack {
             Group {
-                if let encounter = karmaEncounter {
+                if let fallback = ads.fallbackEncounter {
+                    AdUnavailableView(encounter: fallback, secondsRemaining: ads.fallbackSecondsRemaining,
+                                      actionTitle: "このアプリを5分間解除",
+                                      detail: "10秒待つと、このアプリを5分間解除できます。待っている間も、やめられます。",
+                                      eligible: eligible,
+                                      confirm: {
+                                          model.refresh()
+                                          ads.confirmFallback(eligible: { eligible }, perform: { try model.unlock(token) })
+                                      }, cancel: cancelAndDismiss)
+                        .id(fallback.id)
+                } else if let encounter = karmaEncounter {
                     KarmaRoomView(encounter: encounter, continueToAd: showAd, stayLocked: { dismiss() })
                         .id(encounter.id)
                 } else {
@@ -30,8 +41,13 @@ struct UnlockView: View {
                 }
             }
         }
-        .interactiveDismissDisabled(ads.presenting || karmaEncounter != nil)
-        .onDisappear { if !ads.presenting { loadingTask?.cancel() } }
+        .interactiveDismissDisabled(ads.presenting || karmaEncounter != nil || ads.fallbackEncounter != nil)
+        .onDisappear {
+            if !ads.presenting { loadingTask?.cancel(); ads.cancel() }
+        }
+        .onChange(of: scenePhase) { _, phase in
+            if phase != .active && !ads.presenting && ads.busy { cancelAndDismiss() }
+        }
     }
 
     private var unlockDetails: some View {
@@ -47,7 +63,8 @@ struct UnlockView: View {
                     }.card(padding: 16)
                     VStack(alignment: .leading, spacing: 14) {
                         condition("広告の視聴を完了すると、このアプリのロックを5分間解除します。", symbol: "checkmark", accented: true)
-                        condition("途中で閉じると解除されません。", symbol: "xmark", accented: false)
+                        condition("広告を途中で閉じると解除されません。", symbol: "xmark", accented: false)
+                        condition("広告を表示できない場合は、10秒待ってから解除するか選べます。", symbol: "hourglass", accented: false)
                     }.padding(.vertical, 4)
                 }
             }
@@ -58,7 +75,7 @@ struct UnlockView: View {
         .safeAreaInset(edge: .top, spacing: 0) {
             ShinobiHeader(title: "一時解除") {
                 if !ads.granted {
-                    Button("閉じる") { loadingTask?.cancel(); dismiss() }
+                    Button("閉じる") { cancelAndDismiss() }
                         .foregroundStyle(ShinobiStyle.secondary).frame(minHeight: 44).disabled(ads.presenting)
                 }
             } trailing: { Color.clear.frame(height: 44) }
@@ -67,6 +84,12 @@ struct UnlockView: View {
             actions.padding(.horizontal, 20).padding(.top, 12).padding(.bottom, 16)
                 .background(ShinobiStyle.background)
         }
+    }
+
+    private func cancelAndDismiss() {
+        loadingTask?.cancel()
+        ads.cancel()
+        dismiss()
     }
 
     private func showAd() {

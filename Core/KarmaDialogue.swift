@@ -1,7 +1,7 @@
 import Foundation
 
 enum KarmaContext: String, CaseIterable {
-    case unlock, pauseRule, deleteRule
+    case unlock, pauseRule, deleteRule, adUnavailable
 }
 
 enum KarmaPortrait: String, CaseIterable {
@@ -52,6 +52,7 @@ struct KarmaDialogueCatalog: Decodable {
     let deleteBeforeAd: [String]
     let ruleStayed: [String]
     let onboarding: [String]
+    let adUnavailable: [String]
 
     enum CodingKeys: String, CodingKey {
         case unlockBeforeAd = "unlock_before_ad"
@@ -60,16 +61,18 @@ struct KarmaDialogueCatalog: Decodable {
         case deleteBeforeAd = "delete_before_ad"
         case ruleStayed = "rule_stayed"
         case onboarding
+        case adUnavailable = "ad_unavailable"
     }
 
     init(unlockBeforeAd: [String], stayed: [String], pauseBeforeAd: [String] = [],
-         deleteBeforeAd: [String] = [], ruleStayed: [String] = [], onboarding: [String] = []) {
+         deleteBeforeAd: [String] = [], ruleStayed: [String] = [], onboarding: [String] = [], adUnavailable: [String] = []) {
         self.unlockBeforeAd = unlockBeforeAd
         self.stayed = stayed
         self.pauseBeforeAd = pauseBeforeAd
         self.deleteBeforeAd = deleteBeforeAd
         self.ruleStayed = ruleStayed
         self.onboarding = onboarding
+        self.adUnavailable = adUnavailable
     }
 
     init(from decoder: Decoder) throws {
@@ -80,6 +83,7 @@ struct KarmaDialogueCatalog: Decodable {
         deleteBeforeAd = try values.decodeIfPresent([String].self, forKey: .deleteBeforeAd) ?? []
         ruleStayed = try values.decodeIfPresent([String].self, forKey: .ruleStayed) ?? []
         onboarding = try values.decodeIfPresent([String].self, forKey: .onboarding) ?? []
+        adUnavailable = try values.decodeIfPresent([String].self, forKey: .adUnavailable) ?? []
     }
 
     static let fallback = KarmaDialogueCatalog(
@@ -93,7 +97,8 @@ struct KarmaDialogueCatalog: Decodable {
             "曜日と時間、縛るアプリを決めろ。\nまずは一つでいい。\n……守り切るところから始めるぞ。",
             "広告を最後まで見れば、\n5分だけ鎖が緩む。\n……その手前で踏みとどまる方に、\n賭けているがな。",
             "……行ってこい。\n終わったら、堂々としていろ。\n自分で決めて、守ったんだからな。"
-        ]
+        ],
+        adUnavailable: ["……もう行くのか。\n少しだけ、ここにいてくれ。"]
     )
 
     // Keep each page's meaning when an older or partially edited catalog is loaded.
@@ -111,6 +116,7 @@ struct KarmaDialogueCatalog: Decodable {
         case .unlock: return unlockBeforeAd
         case .pauseRule: return pauseBeforeAd
         case .deleteRule: return deleteBeforeAd
+        case .adUnavailable: return adUnavailable
         }
     }
 
@@ -121,8 +127,10 @@ struct KarmaDialogueCatalog: Decodable {
         let differentLines = lines.filter { $0 != previousLine }
         let line = (differentLines.isEmpty ? lines : differentLines).randomElement(using: &random)
             ?? Self.fallback.lines(for: context)[0]
-        let portrait = previousPortrait == nil ? .coolSmirk :
-            KarmaPortrait.allCases.filter { $0 != previousPortrait }.randomElement(using: &random) ?? .coolSmirk
+        let portraits: [KarmaPortrait] = context == .adUnavailable
+            ? [.sadBust, .disappointedFront, .sadLookaway] : KarmaPortrait.allCases
+        let portrait = context != .adUnavailable && previousPortrait == nil ? .coolSmirk :
+            portraits.filter { $0 != previousPortrait }.randomElement(using: &random) ?? .sadBust
         let responses = (context == .unlock ? stayed : ruleStayed)
             .filter { !$0.trimmingCharacters(in: .whitespacesAndNewlines).isEmpty }
         let fallbackResponse = context == .unlock ? Self.fallback.stayed[0] : Self.fallback.ruleStayed[0]
