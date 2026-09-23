@@ -2,13 +2,15 @@
 
 2026年9月16日9:04 JSTに1.0.0（ビルド13）がApp Reviewを通過し、自動公開されました。日本の[App Storeページ](https://apps.apple.com/jp/app/id6811883726)で無料配信を確認済みです。App Store Connectは「配信準備完了」で、ビルド13が選択されています。Family Controlsについての指摘は、提出済みIPAの検証結果を返信した後、ビルドを差し替えずに解消しました。経緯は[App Reviewの記録](app-review-2026-09-15.md)にあります。
 
+9月17日11:41 JSTに、カルマのセリフ4種類を追加した1.0.1（ビルド14）を審査へ提出しました。[提出詳細](https://appstoreconnect.apple.com/apps/6811883726/distribution/reviewsubmissions/details/ef49199b-835b-4046-95b4-c809f0c5bacd)は「審査待ち」です。承認後に全ユーザーへ自動公開する設定で、現時点の公開版は1.0.0（13）です。
+
 AdMobは9月17日にアプリ審査も承認されました。Googleの承認メールと、管理画面の「確認済み」「準備完了」を確認済みで、広告を配信できる状態です。同日朝、ユーザーから実機で広告が表示されたとの報告がありました。報酬処理や再ロックの確認は、この報告には含まれていません。
 
 ## 登録済みのサービス
 
 | 項目 | 値・状態 |
 | --- | --- |
-| App Store Connect | Apple ID `6811883726`、1.0.0（13）は「配信準備完了」。9月16日に日本のApp Storeで無料公開を確認 |
+| App Store Connect | Apple ID `6811883726`。公開版1.0.0（13）は「配信準備完了」。更新版1.0.1（14）は9月17日11:41に提出し「審査待ち」、承認後に自動公開 |
 | Bundle ID | `com.yhei.shinobilock` |
 | SKU | `com.yhei.shinobilock` |
 | アプリ名・言語・カテゴリ | カルマロック、日本語、仕事効率化 |
@@ -35,6 +37,18 @@ AdMobは9月17日にアプリ審査も承認されました。Googleの承認メ
 app-ads.txt: https://yheihei.github.io/app-ads.txt
 
 上記はGitHub Pagesで公開済み。配信リポジトリは `yheihei/yheihei.github.io`、公開コミットは `643fa16`（9月16日にApp Storeのダウンロードリンクを追加）。ビルド13の待機手順は `47974dd` で反映しました。ソースは本リポジトリの `docs/site/`。ストアのプライバシーポリシーURLも保存済みです。
+
+## 1.0.1（ビルド14）：カルマのセリフ追加
+
+- 広告視聴前のセリフを4種類追加し、合計30種類にしました。1.0.0（13）の同梱JSONとの差分は、この4種類のみです。通常サイズでの表示確認は[カルマの間の記録](karma-room.md#2026年9月17日作者の広告収益に触れるセリフ4種)にあります。
+- ストアの更新情報に、セリフを4種類追加したことを記載しました。既存の掲載文・スクリーンショット・審査メモを引き継ぎ、メモ冒頭にセリフ追加の説明を加えました。
+- Coreの30テストが成功。Releaseアーカイブ・App Store用エクスポートが成功し、本体と3拡張すべてが1.0.1（14）であることを確認しました。
+- 実際にアップロードしたIPAの本体と3拡張について、署名と配布プロファイルのFamily Controls権限、`get-task-allow = false`、strict署名検証を確認しました。本番AdMob IDと追加4種類を含むJSONも一致しています。IPAのMD5はContentDeliveryログと照合済みです。
+- 11:36:27にアップロード成功。GoogleMobileAdsとUserMessagingPlatformのdSYM不足の警告は出ていますが、アップロードは成功し、Apple側のビルド処理も完了しました。
+- 暗号化区分は既存版と同じ「上記のアルゴリズムのどれでもない」で保存。ビルド14を選択し、11:41に「1項目が提出されました」を確認しました。提出IDは `ef49199b-835b-4046-95b4-c809f0c5bacd`。提出詳細でも1.0.1（14）と「審査待ち」を確認しました。
+- 公開設定は「このバージョンを自動でリリースする」「すべてのユーザ向けに今すぐアップデートをリリース」。審査承認・公開の完了はまだ確認していません。
+
+証拠は `build/app-store-archive-14.log`、`build/app-store-core-checks-14.log`、`build/app-store-export-14.log`、`build/app-store-upload-14.log`、`build/app-review-1.0.1-14/uploaded-signature-evidence.json` にあります。アップロードしたIPAは `build/app-review-1.0.1-14/ShinobiLock-build14-uploaded.ipa`、アーカイブは `build/KarmaLock-1.0.1-14.xcarchive` です。既存のビルドキャッシュを再利用し、新しいシミュレータは作成していません。
 
 ## 9月16日の公開確認とAdMob対応
 
