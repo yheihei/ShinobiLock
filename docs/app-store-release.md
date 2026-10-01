@@ -2,15 +2,17 @@
 
 2026年9月16日9:04 JSTに1.0.0（ビルド13）がApp Reviewを通過し、自動公開されました。日本の[App Storeページ](https://apps.apple.com/jp/app/id6811883726)で無料配信を確認済みです。App Store Connectは「配信準備完了」で、ビルド13が選択されています。Family Controlsについての指摘は、提出済みIPAの検証結果を返信した後、ビルドを差し替えずに解消しました。経緯は[App Reviewの記録](app-review-2026-09-15.md)にあります。
 
-9月17日11:41 JSTに、カルマのセリフ4種類を追加した1.0.1（ビルド14）を審査へ提出しました。[提出詳細](https://appstoreconnect.apple.com/apps/6811883726/distribution/reviewsubmissions/details/ef49199b-835b-4046-95b4-c809f0c5bacd)は「審査待ち」です。承認後に全ユーザーへ自動公開する設定で、現時点の公開版は1.0.0（13）です。
+9月17日11:41 JSTに、カルマのセリフ4種類を追加した1.0.1（ビルド14）を審査へ提出しました。[提出詳細](https://appstoreconnect.apple.com/apps/6811883726/distribution/reviewsubmissions/details/ef49199b-835b-4046-95b4-c809f0c5bacd)は審査完了となり、10月1日に1.0.1の「配信準備完了」を確認しました。現時点の公開版は1.0.1（14）です。
 
 AdMobは9月17日にアプリ審査も承認されました。Googleの承認メールと、管理画面の「確認済み」「準備完了」を確認済みで、広告を配信できる状態です。同日朝、ユーザーから実機で広告が表示されたとの報告がありました。報酬処理や再ロックの確認は、この報告には含まれていません。
+
+10月1日14:26 JSTに、踏みとどまった返事6種類を追加した1.0.2（ビルド15）を審査へ提出しました。[提出詳細](https://appstoreconnect.apple.com/apps/6811883726/distribution/reviewsubmissions/details/99f10d5a-e6c4-4298-839b-f563941c3f82)で1.0.2（15）と「審査待ち」を確認済みです。承認後に全ユーザーへ自動公開する設定です。審査承認とApp Storeでの公開反映は未確認で、リリース完了とは扱いません。
 
 ## 登録済みのサービス
 
 | 項目 | 値・状態 |
 | --- | --- |
-| App Store Connect | Apple ID `6811883726`。公開版1.0.0（13）は「配信準備完了」。更新版1.0.1（14）は9月17日11:41に提出し「審査待ち」、承認後に自動公開 |
+| App Store Connect | Apple ID `6811883726`。公開版1.0.1（14）は「配信準備完了」。更新版1.0.2（15）は10月1日14:26に提出し「審査待ち」、承認後に自動公開 |
 | Bundle ID | `com.yhei.shinobilock` |
 | SKU | `com.yhei.shinobilock` |
 | アプリ名・言語・カテゴリ | カルマロック、日本語、仕事効率化 |
@@ -37,6 +39,19 @@ AdMobは9月17日にアプリ審査も承認されました。Googleの承認メ
 app-ads.txt: https://yheihei.github.io/app-ads.txt
 
 上記はGitHub Pagesで公開済み。配信リポジトリは `yheihei/yheihei.github.io`、公開コミットは `643fa16`（9月16日にApp Storeのダウンロードリンクを追加）。ビルド13の待機手順は `47974dd` で反映しました。ソースは本リポジトリの `docs/site/`。ストアのプライバシーポリシーURLも保存済みです。
+
+## 1.0.2（ビルド15）：踏みとどまった返事6種の追加
+
+- ユーザー承認済みのセリフを `stayed` と `rule_stayed` に各3種類追加。それぞれ計4種類になりました。他のセリフ、通常1秒の返事表示、表情の独立選択、ロック・広告処理は変更していません。詳細は[カルマの間の記録](karma-room.md#2026年10月1日踏みとどまった返事6種の追加)。
+- Core 30件、広告コントローラ13件、ルール操作・解除要求37件の検証が成功。広告とルール操作はXcode 27.0でも再確認しました。DeviceActivityとManagedSettingsのOS連携はテストダブルです。今回は実機アプリのインストールやデータ変更を行っていません。
+- MacのXcodeを27.0（27A266a）へ更新。初回設定完了と既存Appleアカウント・Yohei Kokuboチームへの再ログインを画面で確認した後、アーカイブとApp Store用IPA書き出しが成功しました。
+- 実アップロードIPAの本体と3拡張でstrict署名検証が成功。Family Controls権限が署名・配布プロファイル双方で有効、`get-task-allow=false`、端末限定プロファイルではなく、すべて1.0.2（15）です。セリフJSONはソースと完全一致。本番AdMob App IDと広告ユニットIDも一致しています。
+- 14:17:02 JSTにアップロード成功。実アップロードIPAのSHA-256は `40e79367cc31c7f79684739b7044f24a4d7eddbf211b0c7a5c5b5355c2593d77`。書き出し時とアップロード時にパッケージ化されたIPAは別々に検証しました。
+- Apple側の処理後、暗号化区分を既存版と同じ「上記のアルゴリズムのどれでもない」として保存。Safariでbuild 15を選択し、14:26 JSTの審査提出を確認しました。提出IDは `99f10d5a-e6c4-4298-839b-f563941c3f82`。
+- 既存の説明文とスクリーンショットを引き継ぎ、更新情報・審査メモに6種類追加を記載。公開設定は自動リリース・全ユーザーへ即時アップデート、既存評価を維持。審査承認と公開反映はまだ確認していません。
+- 既存のShinobi SE QA（iPhone SE第3世代、iOS 26.5）を再利用。別Bundle IDの隔離QAアプリで採用6件の描画と1秒後の閉じる状態を確認しました。撮影用コピーでは返事を起動引数で初期表示するだけで、1秒の処理は維持。本番ビューは変更していません。ホーム画像はスクリーンタイム許可前の状態です。
+
+証拠は `build/app-store-archive-15.log`、`build/app-store-export-15.log`、`build/app-store-upload-15.log`、`build/AppStoreUpload-15/ShinobiLock-verification-15.json`。実アップロードIPAを `build/AppStoreUpload-15/ShinobiLock.ipa`、アーカイブを `build/KarmaLock-1.0.2-15.xcarchive` に保存しています。審査画面と撮影PNGは `/Users/yhei/Documents/Codex/2026-10-01/task/` に保存しました。
 
 ## 1.0.1（ビルド14）：カルマのセリフ追加
 
